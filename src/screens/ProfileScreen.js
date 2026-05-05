@@ -14,12 +14,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout, completeProfile } = useAuth();
   const { clearCart } = useCart();
   const { isDarkMode, toggleTheme, COLORS } = useTheme();
+  const { t } = useLanguage();
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(user?.name || '');
@@ -55,7 +57,7 @@ const ProfileScreen = ({ navigation }) => {
           <TouchableOpacity onPress={() => navigation.goBack()} style={dynamicStyles.backBtn}>
             <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={dynamicStyles.headerTitle}>My Profile</Text>
+          <Text style={dynamicStyles.headerTitle}>{t('my_profile')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -72,14 +74,14 @@ const ProfileScreen = ({ navigation }) => {
 
             {isEditing ? (
               <View style={dynamicStyles.editForm}>
-                <Text style={dynamicStyles.label}>Full Name</Text>
+                <Text style={dynamicStyles.label}>{t('full_name_label')}</Text>
                 <TextInput
                   style={[dynamicStyles.input, { color: COLORS.textPrimary }]}
                   value={name}
                   onChangeText={setName}
                   placeholderTextColor={COLORS.textMuted}
                 />
-                <Text style={dynamicStyles.label}>Billing Address</Text>
+                <Text style={dynamicStyles.label}>{t('billing_address')}</Text>
                 <TextInput
                   style={[dynamicStyles.input, { color: COLORS.textPrimary, height: 80 }]}
                   value={address}
@@ -91,14 +93,14 @@ const ProfileScreen = ({ navigation }) => {
                   {saving ? (
                     <ActivityIndicator color={COLORS.white} size="small" />
                   ) : (
-                    <Text style={dynamicStyles.saveBtnText}>Save Changes</Text>
+                    <Text style={dynamicStyles.saveBtnText}>{t('save_changes')}</Text>
                   )}
                 </TouchableOpacity>
               </View>
             ) : (
               <View style={dynamicStyles.infoSection}>
                 <Text style={dynamicStyles.userName}>{user?.name || 'Smart Checkout User'}</Text>
-                <Text style={dynamicStyles.userPhone}>{user?.phone || 'No phone linking'}</Text>
+                <Text style={dynamicStyles.userPhone}>{user?.phone || t('no_phone')}</Text>
                 {user?.email && <Text style={dynamicStyles.userEmail}>{user.email}</Text>}
                 {user?.address && (
                   <View style={dynamicStyles.addressBox}>
@@ -109,21 +111,21 @@ const ProfileScreen = ({ navigation }) => {
                 
                 <TouchableOpacity style={dynamicStyles.editBtn} onPress={() => setIsEditing(true)}>
                   <Ionicons name="create-outline" size={18} color={COLORS.primary} />
-                  <Text style={dynamicStyles.editBtnText}>Edit Profile</Text>
+                  <Text style={dynamicStyles.editBtnText}>{t('edit_profile')}</Text>
                 </TouchableOpacity>
               </View>
             )}
           </View>
 
           {/* Settings Section */}
-          <Text style={dynamicStyles.sectionTitle}>Settings</Text>
+          <Text style={dynamicStyles.sectionTitle}>{t('settings')}</Text>
           <View style={dynamicStyles.settingsCard}>
             <View style={dynamicStyles.settingRow}>
               <View style={dynamicStyles.settingLabelContainer}>
                 <View style={[dynamicStyles.settingIcon, { backgroundColor: COLORS.secondarySoft }]}>
                   <Ionicons name="moon" size={20} color={COLORS.secondary} />
                 </View>
-                <Text style={dynamicStyles.settingText}>Dark Mode Theme</Text>
+                <Text style={dynamicStyles.settingText}>{t('dark_mode')}</Text>
               </View>
               <Switch
                 value={isDarkMode}
@@ -139,7 +141,7 @@ const ProfileScreen = ({ navigation }) => {
           {/* Footer Actions */}
           <TouchableOpacity style={dynamicStyles.logoutBtn} onPress={handleLogout}>
             <Ionicons name="log-out-outline" size={20} color={COLORS.error} />
-            <Text style={dynamicStyles.logoutText}>Log Out securely</Text>
+            <Text style={dynamicStyles.logoutText}>{t('log_out')}</Text>
           </TouchableOpacity>
         </ScrollView>
       </LinearGradient>

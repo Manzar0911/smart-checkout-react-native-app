@@ -20,6 +20,7 @@ import { COLORS, FONTS, SIZES, SHADOWS } from '../theme';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { productsAPI, offersAPI } from '../services/api';
 import { OFFERS as FALLBACK_OFFERS, RECOMMENDATIONS as FALLBACK_RECOMMENDATIONS, PRODUCTS as FALLBACK_PRODUCTS } from '../data/products';
 
@@ -29,6 +30,7 @@ const HomeScreen = ({ navigation }) => {
   const { itemCount, cartTotal, addItem } = useCart();
   const { user } = useAuth();
   const { COLORS } = useTheme();
+  const { t, language, changeLanguage } = useLanguage();
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   const scanBtnScale = useRef(new Animated.Value(1)).current;
@@ -45,9 +47,9 @@ const HomeScreen = ({ navigation }) => {
   // Get welcome message
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good Morning';
-    if (hour < 17) return 'Good Afternoon';
-    return 'Good Evening';
+    if (hour < 12) return t('good_morning');
+    if (hour < 17) return t('good_afternoon');
+    return t('good_evening');
   };
   const greeting = getGreeting();
 
@@ -235,9 +237,17 @@ const HomeScreen = ({ navigation }) => {
           <Animated.View style={[dynamicStyles.header, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
             <View>
               <Text style={dynamicStyles.greeting}>{greeting}{user && user.name ? `, ${user.name.split(' ')[0]}` : ''} 👋</Text>
-              <Text style={dynamicStyles.headerTitle}>Premium Snacks</Text>
+              <Text style={dynamicStyles.headerTitle}>{t('premium_snacks')}</Text>
             </View>
             <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity 
+                style={dynamicStyles.historyButton} 
+                onPress={() => changeLanguage(language === 'en' ? 'hi' : 'en')}
+              >
+                <Text style={{ color: COLORS.primary, ...FONTS.bold, fontSize: SIZES.md }}>
+                  {language === 'en' ? 'हिं' : 'EN'}
+                </Text>
+              </TouchableOpacity>
               <TouchableOpacity style={dynamicStyles.historyButton} onPress={() => {
                 if (!user) {
                   navigation.navigate('Login');
@@ -271,8 +281,8 @@ const HomeScreen = ({ navigation }) => {
                     <View style={dynamicStyles.scanIconRing}>
                       <Ionicons name="scan" size={40} color={COLORS.white} />
                     </View>
-                    <Text style={dynamicStyles.scanText}>Start Checkout</Text>
-                    <Text style={dynamicStyles.scanSubText}>Perfect for your snack craving</Text>
+                    <Text style={dynamicStyles.scanText}>{t('start_checkout')}</Text>
+                    <Text style={dynamicStyles.scanSubText}>{t('snack_craving')}</Text>
                   </LinearGradient>
                 </Animated.View>
               </TouchableOpacity>
@@ -280,10 +290,10 @@ const HomeScreen = ({ navigation }) => {
 
             {/* Quick Actions */}
             <View style={dynamicStyles.quickActions}>
-              <QuickAction icon="scan-outline" label="Scan" color={COLORS.primary} onPress={() => navigation.navigate('Scanner')} delay={100} />
-              <QuickAction icon="cart-outline" label="Cart" color={COLORS.secondary} onPress={() => navigation.navigate('Cart')} delay={200} />
-              <QuickAction icon="gift-outline" label="Offers" color={COLORS.accent} onPress={() => navigation.navigate('AllOffers')} delay={300} />
-              <QuickAction icon="document-text-outline" label="Bills" color={COLORS.success} onPress={() => navigation.navigate('OrderHistory')} delay={400} />
+              <QuickAction icon="scan-outline" label={t('scan')} color={COLORS.primary} onPress={() => navigation.navigate('Scanner')} delay={100} />
+              <QuickAction icon="cart-outline" label={t('cart')} color={COLORS.secondary} onPress={() => navigation.navigate('Cart')} delay={200} />
+              <QuickAction icon="gift-outline" label={t('offers')} color={COLORS.accent} onPress={() => navigation.navigate('AllOffers')} delay={300} />
+              <QuickAction icon="document-text-outline" label={t('bills')} color={COLORS.success} onPress={() => navigation.navigate('OrderHistory')} delay={400} />
             </View>
 
             {/* Active Cart Banner */}
@@ -305,7 +315,7 @@ const HomeScreen = ({ navigation }) => {
                       <Ionicons name="cart" size={20} color={COLORS.primary} />
                     </View>
                     <View>
-                      <Text style={dynamicStyles.activeCartTitle}>{itemCount} snacks in cart</Text>
+                      <Text style={dynamicStyles.activeCartTitle}>{t('snacks_in_cart', { count: itemCount })}</Text>
                       <Text style={dynamicStyles.activeCartTotal}>₹{cartTotal.toFixed(2)}</Text>
                     </View>
                   </View>
@@ -317,9 +327,9 @@ const HomeScreen = ({ navigation }) => {
             {/* Offers */}
             <View style={dynamicStyles.section}>
               <View style={dynamicStyles.sectionHeader}>
-                <Text style={dynamicStyles.sectionTitle}>Exclusive Deals</Text>
+                <Text style={dynamicStyles.sectionTitle}>{t('exclusive_deals')}</Text>
                 <TouchableOpacity onPress={() => navigation.navigate('AllOffers')}>
-                  <Text style={dynamicStyles.seeAll}>See All</Text>
+                  <Text style={dynamicStyles.seeAll}>{t('see_all')}</Text>
                 </TouchableOpacity>
               </View>
               <FlatList
@@ -337,10 +347,10 @@ const HomeScreen = ({ navigation }) => {
               <View style={dynamicStyles.sectionHeader}>
                 <View style={dynamicStyles.aiHeader}>
                   <Ionicons name="sparkles" size={18} color={COLORS.accent} />
-                  <Text style={dynamicStyles.sectionTitle}> Top Picks for You</Text>
+                  <Text style={dynamicStyles.sectionTitle}>{t('top_picks')}</Text>
                 </View>
                 <TouchableOpacity onPress={() => navigation.navigate('AllProducts')}>
-                  <Text style={dynamicStyles.seeAll}>View All</Text>
+                  <Text style={dynamicStyles.seeAll}>{t('view_all')}</Text>
                 </TouchableOpacity>
               </View>
               <FlatList
@@ -389,14 +399,14 @@ const HomeScreen = ({ navigation }) => {
                       <View style={dynamicStyles.detailItem}>
                         <Ionicons name="leaf-outline" size={18} color={COLORS.secondary} />
                         <View>
-                          <Text style={dynamicStyles.detailLabel}>Ingredients</Text>
+                          <Text style={dynamicStyles.detailLabel}>{t('ingredients')}</Text>
                           <Text style={dynamicStyles.detailValue} numberOfLines={2}>{selectedProduct.ingredients || 'Natural ingredients and spices'}</Text>
                         </View>
                       </View>
                       <View style={dynamicStyles.detailItem}>
                         <Ionicons name="cube-outline" size={18} color={COLORS.accent} />
                         <View>
-                          <Text style={dynamicStyles.detailLabel}>Packaging</Text>
+                          <Text style={dynamicStyles.detailLabel}>{t('packaging')}</Text>
                           <Text style={dynamicStyles.detailValue}>{selectedProduct.packaging || 'Pouch'}</Text>
                         </View>
                       </View>
@@ -417,7 +427,7 @@ const HomeScreen = ({ navigation }) => {
                     >
                       <LinearGradient colors={[COLORS.primary, '#FF4500']} style={dynamicStyles.addBtnGradient}>
                         <Ionicons name="cart" size={20} color={COLORS.white} />
-                        <Text style={dynamicStyles.addBtnText}>Add to Cart</Text>
+                        <Text style={dynamicStyles.addBtnText}>{t('add_to_cart')}</Text>
                       </LinearGradient>
                     </TouchableOpacity>
                   </View>

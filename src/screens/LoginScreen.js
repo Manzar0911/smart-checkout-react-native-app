@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,6 +26,7 @@ const LoginScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
   const styles = getStyles(COLORS);
   const { login, sendOtp, verifyOtp } = useAuth();
+  const { t } = useLanguage();
   
   // States: 'phone' or 'email'
   const [loginMethod, setLoginMethod] = useState('phone');
@@ -69,7 +71,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleSendOtp = async () => {
     if (!phone.trim() || phone.trim().length < 10) {
-      setError('Please enter a valid 10-digit phone number.');
+      setError(t('valid_phone_error'));
       return;
     }
     setLoading(true);
@@ -80,7 +82,7 @@ const LoginScreen = ({ navigation }) => {
       console.log('OTP Sent:', res);
       setOtpSent(true);
     } catch (err) {
-      setError(err.message || 'Failed to send OTP.');
+      setError(err.message || t('failed_send_otp'));
     } finally {
       setLoading(false);
     }
@@ -88,7 +90,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleVerifyOtp = async () => {
     if (!otp.trim() || otp.trim().length !== 4) {
-      setError('Please enter the 4-digit OTP.');
+      setError(t('valid_otp_error'));
       return;
     }
     setLoading(true);
@@ -105,7 +107,7 @@ const LoginScreen = ({ navigation }) => {
         navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
       }
     } catch (err) {
-      setError(err.message || 'Invalid OTP.');
+      setError(err.message || t('invalid_otp'));
     } finally {
       setLoading(false);
     }
@@ -113,7 +115,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleEmailLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      setError('Please enter both email and password.');
+      setError(t('email_password_required'));
       return;
     }
 
@@ -132,7 +134,7 @@ const LoginScreen = ({ navigation }) => {
         navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
       }
     } catch (err) {
-      setError(err.message || 'Login failed. Please try again.');
+      setError(err.message || t('login_failed'));
     } finally {
       setLoading(false);
     }
@@ -161,7 +163,7 @@ const LoginScreen = ({ navigation }) => {
             {/* Header / SKIP */}
             <Animated.View style={{ opacity: fadeAnim, flexDirection: 'row', justifyContent: 'flex-end' }}>
               <TouchableOpacity style={styles.skipBtn} onPress={() => navigation.navigate('Home')}>
-                <Text style={styles.skipText}>Skip for now</Text>
+                <Text style={styles.skipText}>{t('skip_for_now')}</Text>
                 <Ionicons name="arrow-forward" size={16} color={COLORS.primary} />
               </TouchableOpacity>
             </Animated.View>
@@ -185,8 +187,8 @@ const LoginScreen = ({ navigation }) => {
                 { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
               ]}
             >
-              <Text style={styles.welcomeText}>Welcome</Text>
-              <Text style={styles.subtitleText}>Sign in to access your cart</Text>
+              <Text style={styles.welcomeText}>{t('welcome')}</Text>
+              <Text style={styles.subtitleText}>{t('sign_in_subtitle')}</Text>
 
               {/* Login Method Toggle */}
               <View style={styles.toggleContainer}>
@@ -195,14 +197,14 @@ const LoginScreen = ({ navigation }) => {
                   onPress={() => toggleMethod('phone')}
                 >
                   <Ionicons name="call-outline" size={18} color={loginMethod === 'phone' ? COLORS.textPrimary : COLORS.textMuted} />
-                  <Text style={[styles.toggleText, loginMethod === 'phone' && styles.toggleTextActive]}>Phone</Text>
+                  <Text style={[styles.toggleText, loginMethod === 'phone' && styles.toggleTextActive]}>{t('phone')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.toggleBtn, loginMethod === 'email' && styles.toggleBtnActive]}
                   onPress={() => toggleMethod('email')}
                 >
                   <Ionicons name="mail-outline" size={18} color={loginMethod === 'email' ? COLORS.textPrimary : COLORS.textMuted} />
-                  <Text style={[styles.toggleText, loginMethod === 'email' && styles.toggleTextActive]}>Email</Text>
+                  <Text style={[styles.toggleText, loginMethod === 'email' && styles.toggleTextActive]}>{t('email')}</Text>
                 </TouchableOpacity>
               </View>
 
@@ -221,7 +223,7 @@ const LoginScreen = ({ navigation }) => {
                     <Text style={{ color: COLORS.textMuted, marginRight: 8 }}>+91</Text>
                     <TextInput
                       style={styles.input}
-                      placeholder="Phone Number"
+                      placeholder={t('phone_number')}
                       placeholderTextColor={COLORS.textMuted}
                       value={phone}
                       onChangeText={(val) => { setPhone(val); setError(''); setOtpSent(false); }}
@@ -241,7 +243,7 @@ const LoginScreen = ({ navigation }) => {
                       <Ionicons name="keypad-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                       <TextInput
                         style={styles.input}
-                        placeholder="Enter 4-digit OTP"
+                        placeholder={t('enter_otp')}
                         placeholderTextColor={COLORS.textMuted}
                         value={otp}
                         onChangeText={(val) => { setOtp(val); setError(''); }}
@@ -267,7 +269,7 @@ const LoginScreen = ({ navigation }) => {
                         <ActivityIndicator color={COLORS.white} size="small" />
                       ) : (
                         <>
-                          <Text style={styles.loginBtnText}>{otpSent ? 'Verify OTP' : 'Send OTP'}</Text>
+                          <Text style={styles.loginBtnText}>{otpSent ? t('verify_otp') : t('send_otp')}</Text>
                           <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
                         </>
                       )}
@@ -283,7 +285,7 @@ const LoginScreen = ({ navigation }) => {
                     <Ionicons name="mail-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                     <TextInput
                       style={styles.input}
-                      placeholder="Email Address"
+                      placeholder={t('email_address')}
                       placeholderTextColor={COLORS.textMuted}
                       value={email}
                       onChangeText={(val) => { setEmail(val); setError(''); }}
@@ -297,7 +299,7 @@ const LoginScreen = ({ navigation }) => {
                     <Ionicons name="lock-closed-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                     <TextInput
                       style={styles.input}
-                      placeholder="Password"
+                      placeholder={t('password')}
                       placeholderTextColor={COLORS.textMuted}
                       value={password}
                       onChangeText={(val) => { setPassword(val); setError(''); }}
@@ -329,7 +331,7 @@ const LoginScreen = ({ navigation }) => {
                         <ActivityIndicator color={COLORS.white} size="small" />
                       ) : (
                         <>
-                          <Text style={styles.loginBtnText}>Sign In</Text>
+                          <Text style={styles.loginBtnText}>{t('sign_in')}</Text>
                           <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
                         </>
                       )}
@@ -338,9 +340,9 @@ const LoginScreen = ({ navigation }) => {
 
                   {/* Signup Link */}
                   <View style={styles.signupRow}>
-                    <Text style={styles.signupLabel}>Don't have an account? </Text>
+                    <Text style={styles.signupLabel}>{t('no_account')}</Text>
                     <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-                      <Text style={styles.signupLink}>Create Account</Text>
+                      <Text style={styles.signupLink}>{t('create_account')}</Text>
                     </TouchableOpacity>
                   </View>
                 </>

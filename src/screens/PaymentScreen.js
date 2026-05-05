@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { ordersAPI, paymentAPI } from '../services/api';
@@ -47,6 +48,7 @@ const PAYMENT_METHODS = [
 
 const PaymentScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const styles = getStyles(COLORS);
   const {
     items,
@@ -301,7 +303,7 @@ const PaymentScreen = ({ navigation }) => {
             <TouchableOpacity style={styles.backButton} onPress={() => setPaymentState('idle')}>
               <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={styles.headerTitle}>Enter UPI Details</Text>
+            <Text style={styles.headerTitle}>{t('enter_upi_details')}</Text>
             <View style={{ width: 40 }} />
           </Animated.View>
 
@@ -310,12 +312,12 @@ const PaymentScreen = ({ navigation }) => {
               <View style={[styles.methodIcon, { backgroundColor: selectedMethod?.color + '20', width: 60, height: 60, borderRadius: 20 }]}>
                 <Ionicons name={selectedMethod?.icon} size={30} color={selectedMethod?.color} />
               </View>
-              <Text style={styles.upiAppName}>Pay via {selectedMethod?.name}</Text>
+              <Text style={styles.upiAppName}>{t('pay_via')} {selectedMethod?.name}</Text>
               <Text style={styles.upiAppAmount}>₹{cartTotal.toFixed(2)}</Text>
             </View>
 
             <View style={styles.inputWrapper}>
-              <Text style={styles.inputLabel}>UPI ID</Text>
+              <Text style={styles.inputLabel}>{t('upi_id')}</Text>
               <View style={styles.inputBox}>
                 <Ionicons name="at-circle-outline" size={20} color={COLORS.textSecondary} style={{ marginRight: 10 }} />
                 <TextInput
@@ -328,7 +330,7 @@ const PaymentScreen = ({ navigation }) => {
                   autoCorrect={false}
                 />
               </View>
-              <Text style={styles.inputHint}>A payment request will be sent to this UPI ID</Text>
+              <Text style={styles.inputHint}>{t('upi_hint')}</Text>
             </View>
 
             <View style={styles.payContainerStatic}>
@@ -341,7 +343,7 @@ const PaymentScreen = ({ navigation }) => {
                   colors={upiId.includes('@') ? [COLORS.primary, '#FF4500'] : [COLORS.textMuted, COLORS.textDark]}
                   style={styles.payBtnGradient}
                 >
-                  <Text style={styles.payBtnText}>Verify & Pay Securely</Text>
+                  <Text style={styles.payBtnText}>{t('verify_pay_securely')}</Text>
                   <Ionicons name="shield-checkmark" size={18} color={COLORS.white} />
                 </LinearGradient>
               </TouchableOpacity>
@@ -363,14 +365,14 @@ const PaymentScreen = ({ navigation }) => {
               <Ionicons name="card" size={30} color={COLORS.primary} />
             </View>
           </Animated.View>
-          <Text style={styles.processingTitle}>Paying ₹{cartTotal.toFixed(2)}</Text>
-          <Text style={styles.processingSubtitle}>Contacting {selectedMethod?.name}...</Text>
+          <Text style={styles.processingTitle}>{t('paying')} ₹{cartTotal.toFixed(2)}</Text>
+          <Text style={styles.processingSubtitle}>{t('contacting')} {selectedMethod?.name}...</Text>
           <View style={styles.progressBarContainer}>
             <Animated.View style={[styles.progressBar, { width: progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }) }]} />
           </View>
           <View style={styles.securityRow}>
             <Ionicons name="shield-checkmark" size={16} color={COLORS.success} />
-            <Text style={styles.securityText}>100% Secure Transaction</Text>
+            <Text style={styles.securityText}>{t('secure_transaction')}</Text>
           </View>
         </LinearGradient>
       </View>
@@ -388,19 +390,19 @@ const PaymentScreen = ({ navigation }) => {
               <Ionicons name="checkmark" size={60} color={COLORS.white} />
             </LinearGradient>
           </Animated.View>
-          <Text style={styles.successTitle}>Payment Received!</Text>
+          <Text style={styles.successTitle}>{t('payment_received')}</Text>
           <Text style={styles.successAmount}>₹{cartTotal.toFixed(2)}</Text>
-          <Text style={styles.successSubtitle}>Transaction successful via {selectedMethod?.name}</Text>
+          <Text style={styles.successSubtitle}>{t('transaction_successful_via')} {selectedMethod?.name}</Text>
           <View style={styles.successActions}>
             <TouchableOpacity style={styles.receiptBtn} onPress={() => navigation.navigate('Receipt')} activeOpacity={0.85}>
               <LinearGradient colors={[COLORS.primary, '#FF4500']} style={styles.receiptBtnGradient}>
                 <Ionicons name="receipt-outline" size={20} color={COLORS.white} />
-                <Text style={styles.receiptBtnText}>View Receipt</Text>
+                <Text style={styles.receiptBtnText}>{t('view_receipt')}</Text>
               </LinearGradient>
             </TouchableOpacity>
             <TouchableOpacity style={styles.exitBtn} onPress={() => navigation.navigate('UserExitPass')}>
               <Ionicons name="shield-checkmark-outline" size={20} color={COLORS.secondary} />
-              <Text style={styles.exitBtnText}>Get Exit Pass</Text>
+              <Text style={styles.exitBtnText}>{t('get_exit_pass')}</Text>
             </TouchableOpacity>
           </View>
         </LinearGradient>
@@ -417,7 +419,7 @@ const PaymentScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Checkout</Text>
+          <Text style={styles.headerTitle}>{t('checkout')}</Text>
           <View style={{ width: 40 }} />
         </Animated.View>
 
@@ -426,29 +428,29 @@ const PaymentScreen = ({ navigation }) => {
           <Animated.View style={[styles.summaryCard, { opacity: fadeAnim }]}>
             <View style={styles.summaryHeader}>
               <Ionicons name="receipt-outline" size={20} color={COLORS.primary} />
-              <Text style={styles.summaryTitle}>Bill Summary</Text>
+              <Text style={styles.summaryTitle}>{t('bill_summary')}</Text>
             </View>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>Total Items ({itemCount})</Text>
+              <Text style={styles.summaryLabel}>{t('total_items_label')} ({itemCount})</Text>
               <Text style={styles.summaryValue}>₹{cartOriginalTotal.toFixed(2)}</Text>
             </View>
             {totalSavings > 0 && (
               <View style={styles.summaryRow}>
-                <Text style={styles.summaryLabel}>Total Savings</Text>
+                <Text style={styles.summaryLabel}>{t('total_savings')}</Text>
                 <Text style={[styles.summaryValue, { color: COLORS.secondary }]}>-₹{totalSavings.toFixed(2)}</Text>
               </View>
             )}
             <View style={styles.summaryDivider} />
             <View style={styles.summaryRow}>
-              <Text style={styles.totalLabel}>Amount to Pay</Text>
+              <Text style={styles.totalLabel}>{t('amount_to_pay')}</Text>
               <Text style={styles.totalValue}>₹{cartTotal.toFixed(2)}</Text>
             </View>
           </Animated.View>
 
           {/* Payment Methods */}
           <Animated.View style={{ opacity: fadeAnim }}>
-            <Text style={styles.sectionTitle}>Select Payment Method</Text>
-            <Text style={styles.sectionSubtitle}>Seamless one-click payment</Text>
+            <Text style={styles.sectionTitle}>{t('select_payment_method')}</Text>
+            <Text style={styles.sectionSubtitle}>{t('seamless_payment')}</Text>
             {(isAdminOrEmployee ? [
               {
                 id: 'cash',
@@ -496,7 +498,7 @@ const PaymentScreen = ({ navigation }) => {
               colors={selectedMethod && items.length > 0 ? [COLORS.primary, '#FF4500'] : [COLORS.textMuted, COLORS.textDark]}
               style={styles.payBtnGradient}
             >
-              <Text style={styles.payBtnText}>Pay Securely ₹{cartTotal.toFixed(2)}</Text>
+              <Text style={styles.payBtnText}>{t('pay_securely')} ₹{cartTotal.toFixed(2)}</Text>
               <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
             </LinearGradient>
           </TouchableOpacity>

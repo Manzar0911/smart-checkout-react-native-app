@@ -17,10 +17,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const AdminCreateOfferScreen = ({ navigation, route }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const editingOffer = route.params?.offer;
   const isEdit = !!editingOffer;
 
@@ -39,20 +41,20 @@ const AdminCreateOfferScreen = ({ navigation, route }) => {
 
   const handleSaveOffer = async () => {
     if (!offerForm.title || !offerForm.code || !offerForm.discount_value) {
-      Alert.alert('Error', 'Please fill all required fields.');
+      Alert.alert(t('error'), t('fill_all_fields_products') || 'Please fill all fields');
       return;
     }
     setLoading(true);
     try {
       if (isEdit) {
         await api.put(`/api/offers/${editingOffer.id}`, offerForm);
-        Alert.alert('Success', 'Offer updated successfully.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+        Alert.alert(t('success'), t('offer_updated'), [{ text: t('ok'), onPress: () => navigation.goBack() }]);
       } else {
         await api.post('/api/offers', offerForm);
-        Alert.alert('Success', 'Offer created successfully.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+        Alert.alert(t('success'), t('offer_created'), [{ text: t('ok'), onPress: () => navigation.goBack() }]);
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to save offer.');
+      Alert.alert(t('error'), error.message || 'Failed to save offer.');
     } finally {
       setLoading(false);
     }
@@ -60,20 +62,20 @@ const AdminCreateOfferScreen = ({ navigation, route }) => {
 
   const handleDeleteOffer = () => {
     Alert.alert(
-      'Delete Offer',
-      'Are you sure? This will remove the offer from the system.',
+      t('delete_offer'),
+      t('delete_offer_confirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         { 
-          text: 'Delete', 
-          style: 'destructive', 
+          text: t('delete'), 
+          style: 'destructive',
           onPress: async () => {
             setLoading(true);
             try {
               await api.delete(`/api/offers/${editingOffer.id}`);
-              Alert.alert('Deleted', 'Offer removed.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+              Alert.alert(t('deleted'), t('offer_removed'), [{ text: t('ok'), onPress: () => navigation.goBack() }]);
             } catch (error) {
-              Alert.alert('Error', 'Delete failed.');
+              Alert.alert(t('error'), 'Delete failed.');
             } finally {
               setLoading(false);
             }
@@ -98,7 +100,7 @@ const AdminCreateOfferScreen = ({ navigation, route }) => {
               <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
                 <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
               </TouchableOpacity>
-              <Text style={dynamicStyles.headerTitle}>{isEdit ? 'Edit Offer' : 'Create Offer'}</Text>
+              <Text style={dynamicStyles.headerTitle}>{isEdit ? t('edit_offer') : t('create_offer')}</Text>
               <View style={{ width: 40 }} />
             </View>
 
@@ -108,16 +110,16 @@ const AdminCreateOfferScreen = ({ navigation, route }) => {
               keyboardShouldPersistTaps="handled"
             >
               <View style={dynamicStyles.formCard}>
-                <Text style={dynamicStyles.label}>Offer Title</Text>
+                <Text style={dynamicStyles.label}>{t('offer_title')}</Text>
                 <TextInput style={dynamicStyles.input} placeholder="e.g., Summer Sale" placeholderTextColor={COLORS.textMuted} value={offerForm.title} onChangeText={(t) => setOfferForm({ ...offerForm, title: t })} />
 
-                <Text style={dynamicStyles.label}>Subtitle</Text>
+                <Text style={dynamicStyles.label}>{t('subtitle')}</Text>
                 <TextInput style={dynamicStyles.input} placeholder="e.g., Flat 50% Off" placeholderTextColor={COLORS.textMuted} value={offerForm.subtitle} onChangeText={(t) => setOfferForm({ ...offerForm, subtitle: t })} />
 
-                <Text style={dynamicStyles.label}>Coupon Code</Text>
+                <Text style={dynamicStyles.label}>{t('coupon_code')}</Text>
                 <TextInput style={[dynamicStyles.input, { textTransform: 'uppercase' }]} placeholder="e.g., SUMMER50" placeholderTextColor={COLORS.textMuted} value={offerForm.code} onChangeText={(t) => setOfferForm({ ...offerForm, code: t.toUpperCase() })} />
 
-                <Text style={dynamicStyles.label}>Discount Type</Text>
+                <Text style={dynamicStyles.label}>{t('discount_type')}</Text>
                 <View style={{ zIndex: 1000 }}>
                   <TouchableOpacity style={dynamicStyles.input} onPress={() => setShowOfferTypeDropdown(!showOfferTypeDropdown)}>
                     <Text style={{ color: COLORS.textPrimary }}>{offerForm.discount_type.toUpperCase()}</Text>
@@ -137,34 +139,34 @@ const AdminCreateOfferScreen = ({ navigation, route }) => {
                   )}
                 </View>
 
-                <Text style={dynamicStyles.label}>Discount Value</Text>
+                <Text style={dynamicStyles.label}>{t('discount_value')}</Text>
                 <TextInput style={dynamicStyles.input} placeholderTextColor={COLORS.textMuted} keyboardType="numeric" value={offerForm.discount_value} onChangeText={(t) => setOfferForm({ ...offerForm, discount_value: t })} />
 
-                <Text style={dynamicStyles.label}>Card Color</Text>
+                <Text style={dynamicStyles.label}>{t('card_color')}</Text>
                 <TextInput style={dynamicStyles.input} placeholder="e.g., #FF4500" placeholderTextColor={COLORS.textMuted} value={offerForm.color} onChangeText={(t) => setOfferForm({ ...offerForm, color: t })} />
 
                 {isEdit && (
                   <View style={dynamicStyles.toggleRow}>
-                    <Text style={dynamicStyles.label}>Active Status</Text>
+                    <Text style={dynamicStyles.label}>{t('active_status')}</Text>
                     <TouchableOpacity 
                       style={[dynamicStyles.toggleBtn, { backgroundColor: offerForm.is_active ? COLORS.success : COLORS.error }]}
                       onPress={() => setOfferForm({ ...offerForm, is_active: !offerForm.is_active })}
                     >
-                      <Text style={dynamicStyles.toggleText}>{offerForm.is_active ? 'ENABLED' : 'DISABLED'}</Text>
+                      <Text style={dynamicStyles.toggleText}>{offerForm.is_active ? t('active') : t('disabled')}</Text>
                     </TouchableOpacity>
                   </View>
                 )}
 
                 <TouchableOpacity style={dynamicStyles.submitBtn} onPress={handleSaveOffer} disabled={loading}>
                   <LinearGradient colors={['#e91e63', '#c2185b']} style={dynamicStyles.submitBtnGradient}>
-                    {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{isEdit ? 'Update Offer' : 'Create Offer'}</Text>}
+                    {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{isEdit ? t('update_offer') : t('create_offer')}</Text>}
                   </LinearGradient>
                 </TouchableOpacity>
 
                 {isEdit && (
                   <TouchableOpacity style={dynamicStyles.deleteBtn} onPress={handleDeleteOffer} disabled={loading}>
                     <Ionicons name="trash-outline" size={20} color={COLORS.error} />
-                    <Text style={dynamicStyles.deleteBtnText}>Delete Offer</Text>
+                    <Text style={dynamicStyles.deleteBtnText}>{t('delete_offer')}</Text>
                   </TouchableOpacity>
                 )}
               </View>

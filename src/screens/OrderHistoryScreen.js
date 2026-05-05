@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { ordersAPI } from '../services/api';
 
@@ -21,6 +22,7 @@ const { width } = Dimensions.get('window');
 const OrderHistoryScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
   const styles = getStyles(COLORS);
+  const { t } = useLanguage();
   const { pastOrders } = useCart();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -82,7 +84,7 @@ const OrderHistoryScreen = ({ navigation }) => {
       <View style={styles.orderBottom}>
         <View style={styles.itemTags}>
           <View style={styles.itemCountTag}>
-            <Text style={styles.tagText}>{item.itemCount} Items</Text>
+            <Text style={styles.tagText}>{item.itemCount} {t('items')}</Text>
           </View>
           <View style={styles.paymentTag}>
             <Text style={styles.tagText}>{item.paymentMethod.name}</Text>
@@ -90,12 +92,12 @@ const OrderHistoryScreen = ({ navigation }) => {
           {item.isVerified && (
             <View style={styles.verifiedTag}>
               <Ionicons name="checkmark-circle" size={10} color={COLORS.success} />
-              <Text style={[styles.tagText, { color: COLORS.success, marginLeft: 2 }]}>Verified</Text>
+              <Text style={[styles.tagText, { color: COLORS.success, marginLeft: 2 }]}>{t('verified')}</Text>
             </View>
           )}
         </View>
         <View style={styles.viewBtn}>
-          <Text style={styles.viewBtnText}>View Receipt</Text>
+          <Text style={styles.viewBtnText}>{t('view_receipt')}</Text>
           <Ionicons name="chevron-forward" size={14} color={COLORS.primary} />
         </View>
       </View>
@@ -111,28 +113,28 @@ const OrderHistoryScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>My Orders</Text>
+          <Text style={styles.headerTitle}>{t('my_orders')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
         {loading ? (
           <View style={styles.emptyContainer}>
             <ActivityIndicator size="large" color={COLORS.primary} />
-            <Text style={[styles.emptySubtitle, { marginTop: 16 }]}>Loading orders...</Text>
+            <Text style={[styles.emptySubtitle, { marginTop: 16 }]}>{t('loading_orders')}</Text>
           </View>
         ) : orders.length === 0 ? (
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconBg}>
               <Ionicons name="document-text-outline" size={60} color={COLORS.textMuted} />
             </View>
-            <Text style={styles.emptyTitle}>No orders yet</Text>
-            <Text style={styles.emptySubtitle}>Your shopping history will appear here</Text>
+            <Text style={styles.emptyTitle}>{t('no_orders_yet')}</Text>
+            <Text style={styles.emptySubtitle}>{t('order_history_subtitle')}</Text>
             <TouchableOpacity 
               style={styles.startBtn}
               onPress={() => navigation.navigate('Scanner')}
             >
               <LinearGradient colors={[COLORS.primary, '#FF4500']} style={styles.startGradient}>
-                <Text style={styles.startText}>Start Shopping</Text>
+                <Text style={styles.startText}>{t('start_shopping')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>

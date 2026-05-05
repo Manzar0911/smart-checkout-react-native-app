@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
@@ -25,6 +26,7 @@ const CompleteProfileScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
   const styles = getStyles(COLORS);
   const { completeProfile, user } = useAuth();
+  const { t } = useLanguage();
   
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
@@ -53,7 +55,7 @@ const CompleteProfileScreen = ({ navigation }) => {
 
   const handleCompleteProfile = async () => {
     if (!name.trim()) {
-      setError('Name is required.');
+      setError(t('name_required'));
       return;
     }
 
@@ -64,7 +66,7 @@ const CompleteProfileScreen = ({ navigation }) => {
       await completeProfile(name.trim(), email.trim(), address.trim());
       navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     } catch (err) {
-      setError(err.message || 'Failed to update profile. Please try again.');
+      setError(err.message || t('profile_update_failed'));
     } finally {
       setLoading(false);
     }
@@ -90,8 +92,8 @@ const CompleteProfileScreen = ({ navigation }) => {
                 { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
               ]}
             >
-              <Text style={styles.title}>Welcome!</Text>
-              <Text style={styles.subtitle}>Please complete your profile to continue</Text>
+              <Text style={styles.title}>{t('welcome_excl')}</Text>
+              <Text style={styles.subtitle}>{t('complete_profile_subtitle')}</Text>
 
               {error ? (
                 <View style={styles.errorBox}>
@@ -105,7 +107,7 @@ const CompleteProfileScreen = ({ navigation }) => {
                 <Ionicons name="person-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Full Name (Required)"
+                  placeholder={t('full_name_required')}
                   placeholderTextColor={COLORS.textMuted}
                   value={name}
                   onChangeText={(val) => { setName(val); setError(''); }}
@@ -118,7 +120,7 @@ const CompleteProfileScreen = ({ navigation }) => {
                 <Ionicons name="mail-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Email Address (Optional)"
+                  placeholder={t('email_optional')}
                   placeholderTextColor={COLORS.textMuted}
                   value={email}
                   onChangeText={(val) => { setEmail(val); setError(''); }}
@@ -133,7 +135,7 @@ const CompleteProfileScreen = ({ navigation }) => {
                 <Ionicons name="location-outline" size={20} color={COLORS.textMuted} style={[styles.inputIcon, { marginTop: 14 }]} />
                 <TextInput
                   style={[styles.input, styles.textArea]}
-                  placeholder="Billing Address (Optional for now)"
+                  placeholder={t('billing_address_optional')}
                   placeholderTextColor={COLORS.textMuted}
                   value={address}
                   onChangeText={(val) => { setAddress(val); setError(''); }}
@@ -160,7 +162,7 @@ const CompleteProfileScreen = ({ navigation }) => {
                     <ActivityIndicator color={COLORS.white} size="small" />
                   ) : (
                     <>
-                      <Text style={styles.submitBtnText}>Complete Profile</Text>
+                      <Text style={styles.submitBtnText}>{t('complete_profile')}</Text>
                       <Ionicons name="checkmark-circle-outline" size={20} color={COLORS.white} />
                     </>
                   )}

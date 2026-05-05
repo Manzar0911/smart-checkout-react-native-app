@@ -28,6 +28,7 @@ import AdminCreateUserScreen from '../screens/AdminCreateUserScreen';
 import AdminBarcodeScreen from '../screens/AdminBarcodeScreen';
 import AdminVendorBillScreen from '../screens/AdminVendorBillScreen';
 import AdminPastBillsScreen from '../screens/AdminPastBillsScreen';
+import AdminInventoryScreen from '../screens/AdminInventoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -138,6 +139,7 @@ const AppNavigator = () => {
         <Stack.Screen name="AdminBarcode" component={AdminBarcodeScreen} />
         <Stack.Screen name="AdminVendorBill" component={AdminVendorBillScreen} />
         <Stack.Screen name="AdminPastBills" component={AdminPastBillsScreen} />
+        <Stack.Screen name="AdminInventory" component={AdminInventoryScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

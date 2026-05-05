@@ -17,12 +17,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const { height } = Dimensions.get('window');
 
 const AdminOffersScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -77,7 +79,7 @@ const AdminOffersScreen = ({ navigation }) => {
       <View style={{ alignItems: 'flex-end' }}>
         <View style={[dynamicStyles.statusBadge, { backgroundColor: item.is_active ? COLORS.success + '22' : COLORS.error + '22' }]}>
           <Text style={[dynamicStyles.statusText, { color: item.is_active ? COLORS.success : COLORS.error }]}>
-            {item.is_active ? 'LIVE' : 'DISABLED'}
+            {item.is_active ? t('live') : t('disabled')}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={16} color={COLORS.textMuted} style={{ marginTop: 8 }} />
@@ -94,7 +96,7 @@ const AdminOffersScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={dynamicStyles.headerTitle}>Offers & Coupons</Text>
+            <Text style={dynamicStyles.headerTitle}>{t('offers_coupons')}</Text>
             <TouchableOpacity style={dynamicStyles.addBtn} onPress={() => navigation.navigate('AdminCreateOffer')}>
               <Ionicons name="add" size={28} color={COLORS.white} />
             </TouchableOpacity>
@@ -105,7 +107,7 @@ const AdminOffersScreen = ({ navigation }) => {
               <Ionicons name="search" size={20} color={COLORS.textMuted} style={dynamicStyles.searchIcon} />
               <TextInput
                 style={dynamicStyles.searchInput}
-                placeholder="Search by title or code..."
+                placeholder={t('search_title_code')}
                 placeholderTextColor={COLORS.textMuted}
                 value={search}
                 onChangeText={setSearch}
@@ -125,7 +127,7 @@ const AdminOffersScreen = ({ navigation }) => {
               renderItem={({ item }) => <OfferItem item={item} />}
               contentContainerStyle={dynamicStyles.listContent}
               showsVerticalScrollIndicator={false}
-              ListEmptyComponent={<Text style={dynamicStyles.emptyText}>No offers found</Text>}
+              ListEmptyComponent={<Text style={dynamicStyles.emptyText}>{t('no_offers_found')}</Text>}
             />
           )}
 
@@ -134,16 +136,16 @@ const AdminOffersScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.modalOverlay} onPress={() => setShowSortDrawer(false)} />
             <View style={dynamicStyles.sortDrawer}>
               <View style={dynamicStyles.drawerHeader}>
-                <Text style={dynamicStyles.drawerTitle}>Sort Offers</Text>
+                <Text style={dynamicStyles.drawerTitle}>{t('sort_offers')}</Text>
                 <TouchableOpacity onPress={() => setShowSortDrawer(false)}>
                   <Ionicons name="close" size={24} color={COLORS.textPrimary} />
                 </TouchableOpacity>
               </View>
               {[
-                { id: 'title-asc', label: 'Title (A-Z)', icon: 'text-outline' },
-                { id: 'title-desc', label: 'Title (Z-A)', icon: 'text-outline' },
-                { id: 'value-high', label: 'Highest Discount', icon: 'trending-up-outline' },
-                { id: 'value-low', label: 'Lowest Discount', icon: 'trending-down-outline' },
+                { id: 'title-asc', label: t('title_a_z'), icon: 'text-outline' },
+                { id: 'title-desc', label: t('title_z_a'), icon: 'text-outline' },
+                { id: 'value-high', label: t('highest_discount'), icon: 'trending-up-outline' },
+                { id: 'value-low', label: t('lowest_discount'), icon: 'trending-down-outline' },
               ].map(opt => (
                 <TouchableOpacity 
                   key={opt.id} 

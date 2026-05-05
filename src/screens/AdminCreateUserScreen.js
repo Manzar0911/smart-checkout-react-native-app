@@ -17,10 +17,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const AdminCreateUserScreen = ({ navigation, route }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const existingUser = route.params?.user;
   const isEditing = !!existingUser;
 
@@ -37,7 +39,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
 
   const handleSubmit = async () => {
     if (!userForm.name || !userForm.email || !userForm.phone || (!isEditing && !userForm.password)) {
-      Alert.alert('Error', 'Please fill all required fields.');
+      Alert.alert(t('error'), t('name_email_required') || 'Please fill all required fields.');
       return;
     }
 
@@ -45,13 +47,13 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
     try {
       if (isEditing) {
         await api.put(`/api/auth/admin/users/${existingUser.id}`, userForm);
-        Alert.alert('Success', 'User updated successfully.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+        Alert.alert(t('success'), t('user_updated'), [{ text: t('ok'), onPress: () => navigation.goBack() }]);
       } else {
         await api.post('/api/auth/admin/users', userForm);
-        Alert.alert('Success', 'User created successfully.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+        Alert.alert(t('success'), t('user_created'), [{ text: t('ok'), onPress: () => navigation.goBack() }]);
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Action failed.');
+      Alert.alert(t('error'), error.message || 'Action failed.');
     } finally {
       setLoading(false);
     }
@@ -59,20 +61,20 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
 
   const handleDelete = () => {
     Alert.alert(
-      'Delete User',
-      'Are you sure you want to delete this user? This action can be undone by admin.',
+      t('delete_user'),
+      t('delete_user_confirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         { 
-          text: 'Delete', 
+          text: t('delete'), 
           style: 'destructive',
           onPress: async () => {
             setDeleteLoading(true);
             try {
               await api.delete(`/api/auth/admin/users/${existingUser.id}`);
-              Alert.alert('Deleted', 'User has been soft-deleted.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+              Alert.alert(t('deleted') || 'Deleted', t('user_deleted'), [{ text: t('ok'), onPress: () => navigation.goBack() }]);
             } catch (err) {
-              Alert.alert('Error', 'Failed to delete user.');
+              Alert.alert(t('error'), 'Failed to delete user.');
             } finally {
               setDeleteLoading(false);
             }
@@ -96,7 +98,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
             <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={dynamicStyles.headerTitle}>{isEditing ? 'Edit User' : 'Create User'}</Text>
+            <Text style={dynamicStyles.headerTitle}>{isEditing ? t('edit_user') : t('create_user')}</Text>
             <View style={{ width: 40 }} />
           </View>
 
@@ -106,7 +108,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
             keyboardShouldPersistTaps="handled"
           >
             <View style={dynamicStyles.formCard}>
-              <Text style={dynamicStyles.label}>Full Name</Text>
+              <Text style={dynamicStyles.label}>{t('full_name')}</Text>
               <TextInput 
                 style={dynamicStyles.input} 
                 placeholder="Enter full name"
@@ -115,7 +117,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
                 onChangeText={(t) => setUserForm({ ...userForm, name: t })} 
               />
 
-              <Text style={dynamicStyles.label}>Email Address</Text>
+              <Text style={dynamicStyles.label}>{t('email_address')}</Text>
               <TextInput 
                 style={dynamicStyles.input} 
                 placeholder="Enter email"
@@ -126,7 +128,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
                 onChangeText={(t) => setUserForm({ ...userForm, email: t })} 
               />
 
-              <Text style={dynamicStyles.label}>Phone Number</Text>
+              <Text style={dynamicStyles.label}>{t('phone_number')}</Text>
               <TextInput 
                 style={dynamicStyles.input} 
                 placeholder="Enter phone number"
@@ -138,7 +140,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
 
               {!isEditing && (
                 <>
-                  <Text style={dynamicStyles.label}>Password</Text>
+                  <Text style={dynamicStyles.label}>{t('password')}</Text>
                   <TextInput 
                     style={dynamicStyles.input} 
                     placeholder="Enter password"
@@ -150,7 +152,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
                 </>
               )}
 
-              <Text style={dynamicStyles.label}>Role</Text>
+              <Text style={dynamicStyles.label}>{t('role')}</Text>
               <View style={{ zIndex: 1000 }}>
                 <TouchableOpacity style={dynamicStyles.input} onPress={() => setShowRoleDropdown(!showRoleDropdown)}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -181,7 +183,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
 
               <TouchableOpacity style={dynamicStyles.submitBtn} onPress={handleSubmit} disabled={loading}>
                 <LinearGradient colors={['#3498db', '#2980b9']} style={dynamicStyles.submitBtnGradient}>
-                  {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{isEditing ? 'Update User' : 'Create User'}</Text>}
+                  {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{isEditing ? t('edit_user') : t('create_user')}</Text>}
                 </LinearGradient>
               </TouchableOpacity>
 
@@ -196,7 +198,7 @@ const AdminCreateUserScreen = ({ navigation, route }) => {
                   ) : (
                     <>
                       <Ionicons name="trash-outline" size={20} color={COLORS.error} style={{ marginRight: 8 }} />
-                      <Text style={dynamicStyles.deleteBtnText}>Delete User</Text>
+                      <Text style={dynamicStyles.deleteBtnText}>{t('delete_user')}</Text>
                     </>
                   )}
                 </TouchableOpacity>

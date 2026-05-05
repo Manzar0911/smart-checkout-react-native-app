@@ -14,6 +14,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { ordersAPI } from '../services/api';
 
@@ -23,6 +24,7 @@ const { width } = Dimensions.get('window');
 
 const ReceiptScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const styles = getStyles(COLORS);
   const { receipt, items, cartTotal, cartOriginalTotal, totalSavings, setVerified } = useCart();
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -129,7 +131,7 @@ Transaction: ${receipt?.transactionId || 'N/A'}
           >
             <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Digital Receipt</Text>
+          <Text style={styles.headerTitle}>{t('digital_receipt')}</Text>
           <TouchableOpacity style={styles.shareBtn} onPress={handleShare}>
             <Ionicons name="share-outline" size={22} color={COLORS.textPrimary} />
           </TouchableOpacity>
@@ -173,25 +175,25 @@ Transaction: ${receipt?.transactionId || 'N/A'}
             {/* Receipt Meta */}
             <View style={styles.metaGrid}>
               <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Receipt No.</Text>
+                <Text style={styles.metaLabel}>{t('receipt_no')}</Text>
                 <Text style={styles.metaValue}>{receipt?.id || 'N/A'}</Text>
               </View>
               <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Date</Text>
+                <Text style={styles.metaLabel}>{t('date')}</Text>
                 <Text style={styles.metaValue}>{receipt?.date || 'N/A'}</Text>
               </View>
               <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Status</Text>
+                <Text style={styles.metaLabel}>{t('active_status')}</Text>
                 <Text style={[styles.metaValue, { color: isBillVerified ? COLORS.success : COLORS.primary }]}>
                   {isBillVerified ? 'Verified ✓' : 'Paid'}
                 </Text>
               </View>
               <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Time</Text>
+                <Text style={styles.metaLabel}>{t('time')}</Text>
                 <Text style={styles.metaValue}>{receipt?.time || 'N/A'}</Text>
               </View>
               <View style={styles.metaItem}>
-                <Text style={styles.metaLabel}>Payment</Text>
+                <Text style={styles.metaLabel}>{t('payment')}</Text>
                 <Text style={styles.metaValue}>
                   {receipt?.paymentMethod?.name || 'UPI'}
                 </Text>
@@ -208,9 +210,9 @@ Transaction: ${receipt?.transactionId || 'N/A'}
             {/* Items */}
             <View style={styles.itemsSection}>
               <View style={styles.itemsHeader}>
-                <Text style={[styles.itemHeaderText, { flex: 2 }]}>Item</Text>
-                <Text style={[styles.itemHeaderText, { flex: 0.5, textAlign: 'center' }]}>Qty</Text>
-                <Text style={[styles.itemHeaderText, { flex: 1, textAlign: 'right' }]}>Amount</Text>
+                <Text style={[styles.itemHeaderText, { flex: 2 }]}>{t('item')}</Text>
+                <Text style={[styles.itemHeaderText, { flex: 0.5, textAlign: 'center' }]}>{t('qty')}</Text>
+                <Text style={[styles.itemHeaderText, { flex: 1, textAlign: 'right' }]}>{t('amount')}</Text>
               </View>
 
               {items.map((item, index) => (
@@ -241,23 +243,23 @@ Transaction: ${receipt?.transactionId || 'N/A'}
             {/* Totals */}
             <View style={styles.totalsSection}>
               <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Subtotal</Text>
+                <Text style={styles.totalLabel}>{t('subtotal')}</Text>
                 <Text style={styles.totalValue}>₹{cartOriginalTotal.toFixed(2)}</Text>
               </View>
               {totalSavings > 0 && (
                 <View style={styles.totalRow}>
-                  <Text style={styles.totalLabel}>Discount</Text>
+                  <Text style={styles.totalLabel}>{t('discount')}</Text>
                   <Text style={[styles.totalValue, { color: COLORS.secondary }]}>
                     -₹{totalSavings.toFixed(2)}
                   </Text>
                 </View>
               )}
               <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Service Fee</Text>
-                <Text style={[styles.totalValue, { color: COLORS.secondary }]}>FREE</Text>
+                <Text style={styles.totalLabel}>{t('service_fee')}</Text>
+                <Text style={[styles.totalValue, { color: COLORS.secondary }]}>{t('free')}</Text>
               </View>
               <View style={styles.grandTotalRow}>
-                <Text style={styles.grandTotalLabel}>Total Paid</Text>
+                <Text style={styles.grandTotalLabel}>{t('total_paid')}</Text>
                 <Text style={styles.grandTotalValue}>₹{cartTotal.toFixed(2)}</Text>
               </View>
             </View>
@@ -266,14 +268,14 @@ Transaction: ${receipt?.transactionId || 'N/A'}
               <View style={styles.savingsBanner}>
                 <Ionicons name="sparkles" size={16} color={COLORS.secondary} />
                 <Text style={styles.savingsText}>
-                  You saved ₹{totalSavings.toFixed(2)} on this order!
+                  {t('you_saved')} ₹{totalSavings.toFixed(2)} {t('on_this_order')}
                 </Text>
               </View>
             )}
 
             {/* Transaction Info */}
             <View style={styles.transactionInfo}>
-              <Text style={styles.transactionLabel}>Transaction ID</Text>
+              <Text style={styles.transactionLabel}>{t('transaction_id')}</Text>
               <Text style={styles.transactionValue}>
                 {receipt?.transactionId || 'N/A'}
               </Text>
@@ -281,9 +283,9 @@ Transaction: ${receipt?.transactionId || 'N/A'}
 
             {/* Footer */}
             <View style={styles.receiptFooter}>
-              <Text style={styles.footerText}>Thank you for shopping with us!</Text>
+              <Text style={styles.footerText}>{t('thank_you_shopping')}</Text>
               <Text style={styles.footerSubtext}>
-                Smart Checkout • Powered by AI
+                Smart Checkout • {t('powered_by_ai')}
               </Text>
             </View>
           </Animated.View>
@@ -295,7 +297,7 @@ Transaction: ${receipt?.transactionId || 'N/A'}
               <>
                 <View style={styles.verifiedBanner}>
                   <Ionicons name="shield-checkmark" size={22} color={COLORS.success} />
-                  <Text style={styles.verifiedBannerText}>Bill Verified by Guard ✓</Text>
+                  <Text style={styles.verifiedBannerText}>{t('bill_verified_guard')} ✓</Text>
                 </View>
                 <TouchableOpacity
                   style={styles.actionBtn}
@@ -309,7 +311,7 @@ Transaction: ${receipt?.transactionId || 'N/A'}
                     style={styles.actionBtnGradient}
                   >
                     <Ionicons name="home" size={20} color={COLORS.white} />
-                    <Text style={styles.actionBtnText}>Go to Home</Text>
+                    <Text style={styles.actionBtnText}>{t('go_to_home')}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </>
@@ -328,7 +330,7 @@ Transaction: ${receipt?.transactionId || 'N/A'}
                     style={styles.actionBtnGradient}
                   >
                     <Ionicons name="qr-code-outline" size={20} color={COLORS.white} />
-                    <Text style={styles.actionBtnText}>Get Exit Pass (QR)</Text>
+                    <Text style={styles.actionBtnText}>{t('get_exit_pass_qr')}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
 
@@ -337,7 +339,7 @@ Transaction: ${receipt?.transactionId || 'N/A'}
                   onPress={handleShare}
                 >
                   <Ionicons name="download-outline" size={20} color={COLORS.primary} />
-                  <Text style={styles.downloadBtnText}>Share Bill</Text>
+                  <Text style={styles.downloadBtnText}>{t('share_bill')}</Text>
                 </TouchableOpacity>
               </>
             )}

@@ -18,11 +18,13 @@ import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import api, { uploadAPI } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { Image } from 'react-native';
 
 const AdminCreateProductScreen = ({ navigation, route }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const editingProduct = route.params?.product;
   const isEdit = !!editingProduct;
 
@@ -81,7 +83,7 @@ const AdminCreateProductScreen = ({ navigation, route }) => {
 
   const handleSaveProduct = async () => {
     if (!productForm.name || !productForm.price) {
-      Alert.alert('Error', 'Please fill Name and Price.');
+      Alert.alert(t('error'), t('fill_name_price'));
       return;
     }
     setLoading(true);
@@ -102,17 +104,17 @@ const AdminCreateProductScreen = ({ navigation, route }) => {
 
       if (isEdit) {
         await api.put(`/api/products/${editingProduct.id}`, finalProductForm);
-        Alert.alert('Success', 'Product updated successfully.', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+        Alert.alert(t('success'), t('product_updated'), [
+          { text: t('ok'), onPress: () => navigation.goBack() }
         ]);
       } else {
         await api.post('/api/products', finalProductForm);
-        Alert.alert('Success', 'Product added successfully.', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+        Alert.alert(t('success'), t('product_added'), [
+          { text: t('ok'), onPress: () => navigation.goBack() }
         ]);
       }
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to save product.');
+      Alert.alert(t('error'), error.message || t('failed_save_product'));
     } finally {
       setLoading(false);
     }
@@ -120,22 +122,22 @@ const AdminCreateProductScreen = ({ navigation, route }) => {
 
   const handleDeleteProduct = () => {
     Alert.alert(
-      'Delete Product',
-      'Are you sure you want to delete this product? This action cannot be undone.',
+      t('delete_product'),
+      t('delete_product_confirm'),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('cancel'), style: 'cancel' },
         { 
-          text: 'Delete', 
+          text: t('delete'), 
           style: 'destructive',
           onPress: async () => {
             setLoading(true);
             try {
               await api.delete(`/api/products/${editingProduct.id}`);
-              Alert.alert('Deleted', 'Product has been deleted.', [
-                { text: 'OK', onPress: () => navigation.goBack() }
+              Alert.alert(t('deleted'), t('product_deleted'), [
+                { text: t('ok'), onPress: () => navigation.goBack() }
               ]);
             } catch (error) {
-              Alert.alert('Error', 'Failed to delete product.');
+              Alert.alert(t('error'), t('failed_delete_product'));
             } finally {
               setLoading(false);
             }
@@ -160,29 +162,29 @@ const AdminCreateProductScreen = ({ navigation, route }) => {
               <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
                 <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
               </TouchableOpacity>
-              <Text style={dynamicStyles.headerTitle}>{isEdit ? 'Edit Product' : 'Add New Product'}</Text>
+              <Text style={dynamicStyles.headerTitle}>{isEdit ? t('edit_product') : t('add_new_product')}</Text>
               <View style={{ width: 40 }} />
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={dynamicStyles.scrollContent}>
               <View style={dynamicStyles.formCard}>
-                <Text style={dynamicStyles.label}>Name</Text>
+                <Text style={dynamicStyles.label}>{t('name')}</Text>
                 <TextInput style={dynamicStyles.input} placeholderTextColor={COLORS.textMuted} value={productForm.name} onChangeText={(t) => setProductForm({ ...productForm, name: t })} />
 
-                <Text style={dynamicStyles.label}>Brand</Text>
+                <Text style={dynamicStyles.label}>{t('brand')}</Text>
                 <TextInput style={dynamicStyles.input} placeholderTextColor={COLORS.textMuted} value={productForm.brand} onChangeText={(t) => setProductForm({ ...productForm, brand: t })} />
 
-                <Text style={dynamicStyles.label}>Price (₹)</Text>
+                <Text style={dynamicStyles.label}>{t('price')} (₹)</Text>
                 <TextInput style={dynamicStyles.input} placeholderTextColor={COLORS.textMuted} keyboardType="numeric" value={productForm.price} onChangeText={(t) => setProductForm({ ...productForm, price: t })} />
 
-                <Text style={dynamicStyles.label}>Original Price (₹)</Text>
+                <Text style={dynamicStyles.label}>{t('original_price_label')} (₹)</Text>
                 <TextInput style={dynamicStyles.input} placeholderTextColor={COLORS.textMuted} keyboardType="numeric" value={productForm.originalPrice} onChangeText={(t) => setProductForm({ ...productForm, originalPrice: t })} />
 
-                <Text style={dynamicStyles.label}>Category</Text>
+                <Text style={dynamicStyles.label}>{t('category')}</Text>
                 <View style={{ zIndex: 3000 }}>
                   <TextInput 
                     style={dynamicStyles.input} 
-                    placeholder="Search or type new category..." 
+                    placeholder={t('search_category')} 
                     placeholderTextColor={COLORS.textMuted} 
                     value={productForm.categoryName} 
                     onChangeText={(t) => {
@@ -213,10 +215,10 @@ const AdminCreateProductScreen = ({ navigation, route }) => {
                   )}
                 </View>
 
-                <Text style={dynamicStyles.label}>Weight</Text>
+                <Text style={dynamicStyles.label}>{t('weight')}</Text>
                 <TextInput style={dynamicStyles.input} placeholder="e.g. 1kg or 100gm" placeholderTextColor={COLORS.textMuted} value={productForm.weight} onChangeText={(t) => setProductForm({ ...productForm, weight: t })} />
 
-                <Text style={dynamicStyles.label}>Product Images</Text>
+                <Text style={dynamicStyles.label}>{t('product_images')}</Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginVertical: 10 }}>
                   {existingImages.map((uri, index) => (
                     <View key={`ext-${index}`} style={dynamicStyles.imagePreviewContainer}>
@@ -236,32 +238,32 @@ const AdminCreateProductScreen = ({ navigation, route }) => {
                   ))}
                   <TouchableOpacity style={dynamicStyles.addImageBtn} onPress={pickImage}>
                     <Ionicons name="camera-outline" size={30} color={COLORS.textMuted} />
-                    <Text style={{ color: COLORS.textMuted, fontSize: 12, marginTop: 5 }}>Add Photo</Text>
+                    <Text style={{ color: COLORS.textMuted, fontSize: 12, marginTop: 5 }}>{t('add_photo')}</Text>
                   </TouchableOpacity>
                 </ScrollView>
 
                 {isEdit && (
                   <View style={dynamicStyles.toggleRow}>
-                    <Text style={dynamicStyles.label}>Active Status</Text>
+                    <Text style={dynamicStyles.label}>{t('active_status')}</Text>
                     <TouchableOpacity 
                       style={[dynamicStyles.toggleBtn, { backgroundColor: productForm.isActive ? COLORS.success : COLORS.error }]}
                       onPress={() => setProductForm({ ...productForm, isActive: !productForm.isActive })}
                     >
-                      <Text style={dynamicStyles.toggleText}>{productForm.isActive ? 'ACTIVE' : 'DISABLED'}</Text>
+                      <Text style={dynamicStyles.toggleText}>{productForm.isActive ? t('active') : t('disabled')}</Text>
                     </TouchableOpacity>
                   </View>
                 )}
 
                 <TouchableOpacity style={dynamicStyles.submitBtn} onPress={handleSaveProduct} disabled={loading}>
                   <LinearGradient colors={[COLORS.primary, '#FF4500']} style={dynamicStyles.submitBtnGradient}>
-                    {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{isEdit ? 'Update Product' : 'Create Product'}</Text>}
+                    {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{isEdit ? t('update_product') : t('create_product')}</Text>}
                   </LinearGradient>
                 </TouchableOpacity>
 
                 {isEdit && (
                   <TouchableOpacity style={dynamicStyles.deleteBtn} onPress={handleDeleteProduct} disabled={loading}>
                     <Ionicons name="trash-outline" size={20} color={COLORS.error} />
-                    <Text style={dynamicStyles.deleteBtnText}>Delete Product</Text>
+                    <Text style={dynamicStyles.deleteBtnText}>{t('delete_product')}</Text>
                   </TouchableOpacity>
                 )}
               </View>

@@ -18,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
@@ -25,6 +26,7 @@ const SignupScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
   const styles = getStyles(COLORS);
   const { signup } = useAuth();
+  const { t } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -54,17 +56,17 @@ const SignupScreen = ({ navigation }) => {
 
   const handleSignup = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
-      setError('Name, email, and password are required.');
+      setError(t('name_email_required'));
       return;
     }
 
     if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError(t('password_min_error'));
       return;
     }
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError(t('passwords_no_match'));
       return;
     }
 
@@ -75,7 +77,7 @@ const SignupScreen = ({ navigation }) => {
       await signup(name.trim(), email.trim(), phone.trim(), password);
       navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
     } catch (err) {
-      setError(err.message || 'Signup failed. Please try again.');
+      setError(err.message || t('signup_failed'));
     } finally {
       setLoading(false);
     }
@@ -108,8 +110,8 @@ const SignupScreen = ({ navigation }) => {
                 { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
               ]}
             >
-              <Text style={styles.title}>Create Account</Text>
-              <Text style={styles.subtitle}>Join the smart checkout experience</Text>
+              <Text style={styles.title}>{t('create_account')}</Text>
+              <Text style={styles.subtitle}>{t('join_experience')}</Text>
 
               {error ? (
                 <View style={styles.errorBox}>
@@ -123,7 +125,7 @@ const SignupScreen = ({ navigation }) => {
                 <Ionicons name="person-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Full Name"
+                  placeholder={t('full_name')}
                   placeholderTextColor={COLORS.textMuted}
                   value={name}
                   onChangeText={(val) => { setName(val); setError(''); }}
@@ -136,7 +138,7 @@ const SignupScreen = ({ navigation }) => {
                 <Ionicons name="mail-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Email Address"
+                  placeholder={t('email_address')}
                   placeholderTextColor={COLORS.textMuted}
                   value={email}
                   onChangeText={(val) => { setEmail(val); setError(''); }}
@@ -151,7 +153,7 @@ const SignupScreen = ({ navigation }) => {
                 <Ionicons name="call-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Phone Number (optional)"
+                  placeholder={t('phone_optional')}
                   placeholderTextColor={COLORS.textMuted}
                   value={phone}
                   onChangeText={(val) => { setPhone(val); setError(''); }}
@@ -164,7 +166,7 @@ const SignupScreen = ({ navigation }) => {
                 <Ionicons name="lock-closed-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Password (min 6 chars)"
+                  placeholder={t('password_min')}
                   placeholderTextColor={COLORS.textMuted}
                   value={password}
                   onChangeText={(val) => { setPassword(val); setError(''); }}
@@ -185,7 +187,7 @@ const SignupScreen = ({ navigation }) => {
                 <Ionicons name="shield-checkmark-outline" size={20} color={COLORS.textMuted} style={styles.inputIcon} />
                 <TextInput
                   style={styles.input}
-                  placeholder="Confirm Password"
+                  placeholder={t('confirm_password')}
                   placeholderTextColor={COLORS.textMuted}
                   value={confirmPassword}
                   onChangeText={(val) => { setConfirmPassword(val); setError(''); }}
@@ -211,7 +213,7 @@ const SignupScreen = ({ navigation }) => {
                     <ActivityIndicator color={COLORS.white} size="small" />
                   ) : (
                     <>
-                      <Text style={styles.signupBtnText}>Create Account</Text>
+                      <Text style={styles.signupBtnText}>{t('create_account')}</Text>
                       <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
                     </>
                   )}
@@ -220,9 +222,9 @@ const SignupScreen = ({ navigation }) => {
 
               {/* Login Link */}
               <View style={styles.loginRow}>
-                <Text style={styles.loginLabel}>Already have an account? </Text>
+                <Text style={styles.loginLabel}>{t('already_have_account')}</Text>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
-                  <Text style={styles.loginLink}>Sign In</Text>
+                  <Text style={styles.loginLink}>{t('sign_in')}</Text>
                 </TouchableOpacity>
               </View>
             </Animated.View>

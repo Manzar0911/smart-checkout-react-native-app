@@ -17,12 +17,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const { width, height } = Dimensions.get('window');
 
 const AdminProductsScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -79,7 +81,7 @@ const AdminProductsScreen = ({ navigation }) => {
           <Text style={dynamicStyles.productPrice}>₹{item.price}</Text>
           {!item.isActive && (
             <View style={dynamicStyles.disabledBadge}>
-              <Text style={dynamicStyles.disabledText}>DISABLED</Text>
+              <Text style={dynamicStyles.disabledText}>{t('disabled')}</Text>
             </View>
           )}
         </View>
@@ -87,7 +89,7 @@ const AdminProductsScreen = ({ navigation }) => {
       <View style={dynamicStyles.stockContainer}>
         <View style={[dynamicStyles.stockBadge, { backgroundColor: item.stockQuantity > 10 ? COLORS.success + '22' : COLORS.error + '22' }]}>
           <Text style={[dynamicStyles.stockText, { color: item.stockQuantity > 10 ? COLORS.success : COLORS.error }]}>
-            Stock: {item.stockQuantity}
+            {t('stock')}: {item.stockQuantity}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} style={{ marginTop: 8 }} />
@@ -104,7 +106,7 @@ const AdminProductsScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={dynamicStyles.headerTitle}>Products & Stock</Text>
+            <Text style={dynamicStyles.headerTitle}>{t('products_stock')}</Text>
             <TouchableOpacity style={dynamicStyles.addBtn} onPress={() => navigation.navigate('AdminCreateProduct')}>
               <Ionicons name="add" size={28} color={COLORS.white} />
             </TouchableOpacity>
@@ -115,7 +117,7 @@ const AdminProductsScreen = ({ navigation }) => {
               <Ionicons name="search" size={20} color={COLORS.textMuted} style={dynamicStyles.searchIcon} />
               <TextInput
                 style={dynamicStyles.searchInput}
-                placeholder="Search products..."
+                placeholder={t('search_products')}
                 placeholderTextColor={COLORS.textMuted}
                 value={search}
                 onChangeText={setSearch}
@@ -135,7 +137,7 @@ const AdminProductsScreen = ({ navigation }) => {
               renderItem={({ item }) => <ProductItem item={item} />}
               contentContainerStyle={dynamicStyles.listContent}
               showsVerticalScrollIndicator={false}
-              ListEmptyComponent={<Text style={dynamicStyles.emptyText}>No products found</Text>}
+              ListEmptyComponent={<Text style={dynamicStyles.emptyText}>{t('no_products_found')}</Text>}
             />
           )}
 
@@ -144,18 +146,18 @@ const AdminProductsScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.modalOverlay} onPress={() => setShowSortDrawer(false)} />
             <View style={dynamicStyles.sortDrawer}>
               <View style={dynamicStyles.drawerHeader}>
-                <Text style={dynamicStyles.drawerTitle}>Sort Products</Text>
+                <Text style={dynamicStyles.drawerTitle}>{t('sort_products')}</Text>
                 <TouchableOpacity onPress={() => setShowSortDrawer(false)}>
                   <Ionicons name="close" size={24} color={COLORS.textPrimary} />
                 </TouchableOpacity>
               </View>
               {[
-                { id: 'name-asc', label: 'Name (A-Z)', icon: 'text-outline' },
-                { id: 'name-desc', label: 'Name (Z-A)', icon: 'text-outline' },
-                { id: 'price-low', label: 'Price (Low to High)', icon: 'trending-up-outline' },
-                { id: 'price-high', label: 'Price (High to Low)', icon: 'trending-down-outline' },
-                { id: 'stock-low', label: 'Stock (Low to High)', icon: 'cube-outline' },
-                { id: 'stock-high', label: 'Stock (High to Low)', icon: 'cube-outline' },
+                { id: 'name-asc', label: t('name_a_z'), icon: 'text-outline' },
+                { id: 'name-desc', label: t('name_z_a'), icon: 'text-outline' },
+                { id: 'price-low', label: t('price_low_high'), icon: 'trending-up-outline' },
+                { id: 'price-high', label: t('price_high_low'), icon: 'trending-down-outline' },
+                { id: 'stock-low', label: t('stock_low_high'), icon: 'cube-outline' },
+                { id: 'stock-high', label: t('stock_high_low'), icon: 'cube-outline' },
               ].map(opt => (
                 <TouchableOpacity 
                   key={opt.id} 

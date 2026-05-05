@@ -19,10 +19,12 @@ import api from '../services/api';
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const AdminVendorBillScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [vendorForm, setVendorForm] = useState({ id: null, name: '', phone: '' });
@@ -63,14 +65,14 @@ const AdminVendorBillScreen = ({ navigation }) => {
 
   const handleAddProductToBill = () => {
     if (!selectedBillProduct || !billProductQty) {
-      Alert.alert('Error', 'Please select a product and quantity.');
+      Alert.alert(t('error'), t('select_product_qty'));
       return;
     }
     const qty = parseInt(billProductQty);
     if (qty <= 0) return;
     
     if (qty > selectedBillProduct.stockQuantity) {
-      Alert.alert('Stock Limit Exceeded', `Only ${selectedBillProduct.stockQuantity} units are available.`);
+      Alert.alert(t('stock_limit_exceeded'), `${t('only')} ${selectedBillProduct.stockQuantity} ${t('units_available')}`);
       return;
     }
     
@@ -112,17 +114,17 @@ const AdminVendorBillScreen = ({ navigation }) => {
         </style>
       </head>
       <body>
-        <div class="header"><h1>TAX INVOICE</h1></div>
+        <div class="header"><h1>${t('tax_invoice')}</h1></div>
         <p><strong>${businessName}</strong><br>${businessAddress}<br>GSTIN: ${gstin}</p>
         <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-          <div><p>Billed To:<br><strong>${billDetails.vendorName}</strong><br>Phone: ${billDetails.vendorPhone}</p></div>
-          <div><p>Invoice No: INV-${billDetails.id}<br>Date: ${new Date(billDetails.date).toLocaleDateString()}</p></div>
+          <div><p>${t('billed_to')}:<br><strong>${billDetails.vendorName}</strong><br>Phone: ${billDetails.vendorPhone}</p></div>
+          <div><p>${t('invoice_no')}: INV-${billDetails.id}<br>${t('date')}: ${new Date(billDetails.date).toLocaleDateString()}</p></div>
         </div>
         <table>
-          <thead><tr><th>S.No</th><th>Product</th><th>Qty</th><th>Rate</th><th>Total</th></tr></thead>
+          <thead><tr><th>${t('s_no')}</th><th>${t('product')}</th><th>${t('qty')}</th><th>${t('rate')}</th><th>${t('total')}</th></tr></thead>
           <tbody>
             ${items.map((p, i) => `<tr><td>${i+1}</td><td>${p.name}</td><td>${p.quantity}</td><td>${p.price}</td><td>${(p.price*p.quantity).toFixed(2)}</td></tr>`).join('')}
-            <tr class="total"><td colspan="4" class="text-right">Grand Total</td><td>₹${billDetails.total.toFixed(2)}</td></tr>
+            <tr class="total"><td colspan="4" class="text-right">${t('grand_total')}</td><td>₹${billDetails.total.toFixed(2)}</td></tr>
           </tbody>
         </table>
       </body>
@@ -134,7 +136,7 @@ const AdminVendorBillScreen = ({ navigation }) => {
 
   const handleCreateVendorBill = async () => {
     if (!vendorForm.name || !vendorForm.phone || vendorProducts.length === 0) {
-      Alert.alert('Error', 'Please fill all fields and add products.');
+      Alert.alert(t('error'), t('fill_all_fields_products'));
       return;
     }
     setLoading(true);
@@ -142,9 +144,9 @@ const AdminVendorBillScreen = ({ navigation }) => {
       const response = await api.post('/api/vendors/bills', { vendor: vendorForm, products: vendorProducts });
       const total = vendorProducts.reduce((sum, p) => sum + p.price * p.quantity, 0);
       await generateGSTPDF({ id: response.billId, vendorName: vendorForm.name, vendorPhone: vendorForm.phone, date: new Date(), total }, vendorProducts);
-      Alert.alert('Success', 'Vendor bill created successfully!', [{ text: 'OK', onPress: () => navigation.goBack() }]);
+      Alert.alert(t('success'), t('vendor_bill_created'), [{ text: t('ok'), onPress: () => navigation.goBack() }]);
     } catch (error) {
-      Alert.alert('Error', 'Failed to create bill. Please try again.');
+      Alert.alert(t('error'), t('failed_to_create_bill'));
     } finally {
       setLoading(false);
     }
@@ -164,7 +166,7 @@ const AdminVendorBillScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={dynamicStyles.headerTitle}>Create Vendor Bill</Text>
+            <Text style={dynamicStyles.headerTitle}>{t('create_vendor_bill')}</Text>
             <View style={{ width: 40 }} />
           </View>
 
@@ -174,13 +176,13 @@ const AdminVendorBillScreen = ({ navigation }) => {
             keyboardShouldPersistTaps="handled"
           >
             <View style={dynamicStyles.formCard}>
-              <Text style={dynamicStyles.sectionTitle}>Vendor Information</Text>
+              <Text style={dynamicStyles.sectionTitle}>{t('vendor_information')}</Text>
               
-              <Text style={dynamicStyles.label}>Vendor Name</Text>
+              <Text style={dynamicStyles.label}>{t('vendor_name')}</Text>
               <View style={{ zIndex: 2000 }}>
                 <TextInput 
                   style={dynamicStyles.input} 
-                  placeholder="Search or enter vendor name..." 
+                  placeholder={t('search_or_enter_vendor_name')} 
                   placeholderTextColor={COLORS.textMuted}
                   value={vendorSearchText} 
                   onChangeText={(t) => { 
@@ -210,10 +212,10 @@ const AdminVendorBillScreen = ({ navigation }) => {
                 )}
               </View>
 
-              <Text style={dynamicStyles.label}>Vendor Phone</Text>
+              <Text style={dynamicStyles.label}>{t('vendor_phone')}</Text>
               <TextInput 
                 style={dynamicStyles.input} 
-                placeholder="Enter phone number"
+                placeholder={t('enter_phone_number')}
                 placeholderTextColor={COLORS.textMuted}
                 keyboardType="phone-pad" 
                 value={vendorForm.phone} 
@@ -222,12 +224,12 @@ const AdminVendorBillScreen = ({ navigation }) => {
               
               <View style={dynamicStyles.divider} />
               
-              <Text style={dynamicStyles.sectionTitle}>Add Products to Bill</Text>
+              <Text style={dynamicStyles.sectionTitle}>{t('add_products_to_bill')}</Text>
               <View style={{ flexDirection: 'row', gap: 10, zIndex: 1000 }}>
                 <View style={{ flex: 2 }}>
                   <TextInput 
                     style={dynamicStyles.input} 
-                    placeholder="Search product..." 
+                    placeholder={t('search_product')} 
                     placeholderTextColor={COLORS.textMuted}
                     value={billProductSearch} 
                     onChangeText={(t) => { 
@@ -250,7 +252,7 @@ const AdminVendorBillScreen = ({ navigation }) => {
                             }}
                           >
                             <Text style={dynamicStyles.dropdownItemTitle}>{prod.name}</Text>
-                            <Text style={dynamicStyles.dropdownItemSub}>₹{prod.price} • Stock: {prod.stockQuantity}</Text>
+                            <Text style={dynamicStyles.dropdownItemSub}>₹{prod.price} • {t('stock')}: {prod.stockQuantity}</Text>
                           </TouchableOpacity>
                         ))}
                       </ScrollView>
@@ -259,7 +261,7 @@ const AdminVendorBillScreen = ({ navigation }) => {
                 </View>
                 <TextInput 
                   style={[dynamicStyles.input, { flex: 1 }]} 
-                  placeholder="Qty" 
+                  placeholder={t('qty')} 
                   placeholderTextColor={COLORS.textMuted}
                   keyboardType="numeric" 
                   value={billProductQty} 
@@ -269,12 +271,12 @@ const AdminVendorBillScreen = ({ navigation }) => {
               
               <TouchableOpacity style={dynamicStyles.addProdBtn} onPress={handleAddProductToBill}>
                 <Ionicons name="add-circle-outline" size={20} color={COLORS.primary} />
-                <Text style={dynamicStyles.addProdBtnText}>Add Product</Text>
+                <Text style={dynamicStyles.addProdBtnText}>{t('add_product')}</Text>
               </TouchableOpacity>
 
               {vendorProducts.length > 0 && (
                 <View style={dynamicStyles.billItemsList}>
-                  <Text style={dynamicStyles.subSectionTitle}>Items List</Text>
+                  <Text style={dynamicStyles.subSectionTitle}>{t('items_list')}</Text>
                   {vendorProducts.map((p, i) => (
                     <View key={i} style={dynamicStyles.billItem}>
                       <View style={{ flex: 1 }}>
@@ -288,7 +290,7 @@ const AdminVendorBillScreen = ({ navigation }) => {
                     </View>
                   ))}
                   <View style={dynamicStyles.grandTotalRow}>
-                    <Text style={dynamicStyles.grandTotalLabel}>Grand Total</Text>
+                    <Text style={dynamicStyles.grandTotalLabel}>{t('grand_total')}</Text>
                     <Text style={dynamicStyles.grandTotalValue}>₹{vendorProducts.reduce((sum, p) => sum + p.price * p.quantity, 0).toFixed(2)}</Text>
                   </View>
                 </View>
@@ -296,7 +298,7 @@ const AdminVendorBillScreen = ({ navigation }) => {
 
               <TouchableOpacity style={dynamicStyles.submitBtn} onPress={handleCreateVendorBill} disabled={loading}>
                 <LinearGradient colors={['#2ecc71', '#27ae60']} style={dynamicStyles.submitBtnGradient}>
-                  {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>Generate Bill & Share</Text>}
+                  {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{t('generate_bill_share')}</Text>}
                 </LinearGradient>
               </TouchableOpacity>
             </View>

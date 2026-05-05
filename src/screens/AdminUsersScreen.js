@@ -17,12 +17,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const { width, height } = Dimensions.get('window');
 
 const AdminUsersScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -73,14 +75,14 @@ const AdminUsersScreen = ({ navigation }) => {
       onPress={() => navigation.navigate('AdminCreateUser', { user: item })}
     >
       <View style={dynamicStyles.userInfo}>
-        <Text style={dynamicStyles.userName}>{item.name || 'No Name'}</Text>
+        <Text style={dynamicStyles.userName}>{item.name || t('no_name')}</Text>
         <Text style={dynamicStyles.userMeta}>{item.phone} • {item.role.toUpperCase()}</Text>
         <Text style={dynamicStyles.userEmail}>{item.email}</Text>
       </View>
       <View style={dynamicStyles.statusContainer}>
         <View style={[dynamicStyles.statusBadge, { backgroundColor: item.is_profile_complete ? COLORS.success + '22' : COLORS.warning + '22' }]}>
           <Text style={[dynamicStyles.statusText, { color: item.is_profile_complete ? COLORS.success : COLORS.warning }]}>
-            {item.is_profile_complete ? 'ACTIVE' : 'PENDING'}
+            {item.is_profile_complete ? t('active') : t('pending')}
           </Text>
         </View>
         <Ionicons name="chevron-forward" size={18} color={COLORS.textMuted} style={{ marginTop: 8 }} />
@@ -97,7 +99,7 @@ const AdminUsersScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={dynamicStyles.headerTitle}>User Management</Text>
+            <Text style={dynamicStyles.headerTitle}>{t('user_management')}</Text>
             <TouchableOpacity style={dynamicStyles.addBtn} onPress={() => navigation.navigate('AdminCreateUser')}>
               <Ionicons name="person-add" size={24} color={COLORS.white} />
             </TouchableOpacity>
@@ -108,7 +110,7 @@ const AdminUsersScreen = ({ navigation }) => {
               <Ionicons name="search" size={20} color={COLORS.textMuted} style={dynamicStyles.searchIcon} />
               <TextInput
                 style={dynamicStyles.searchInput}
-                placeholder="Search users..."
+                placeholder={t('search_users')}
                 placeholderTextColor={COLORS.textMuted}
                 value={search}
                 onChangeText={setSearch}
@@ -128,7 +130,7 @@ const AdminUsersScreen = ({ navigation }) => {
               renderItem={({ item }) => <UserItem item={item} />}
               contentContainerStyle={dynamicStyles.listContent}
               showsVerticalScrollIndicator={false}
-              ListEmptyComponent={<Text style={dynamicStyles.emptyText}>No users found</Text>}
+              ListEmptyComponent={<Text style={dynamicStyles.emptyText}>{t('no_users_found')}</Text>}
             />
           )}
 
@@ -137,17 +139,17 @@ const AdminUsersScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.modalOverlay} onPress={() => setShowSortDrawer(false)} />
             <View style={dynamicStyles.sortDrawer}>
               <View style={dynamicStyles.drawerHeader}>
-                <Text style={dynamicStyles.drawerTitle}>Sort Users</Text>
+                <Text style={dynamicStyles.drawerTitle}>{t('sort_users')}</Text>
                 <TouchableOpacity onPress={() => setShowSortDrawer(false)}>
                   <Ionicons name="close" size={24} color={COLORS.textPrimary} />
                 </TouchableOpacity>
               </View>
               {[
-                { id: 'name-asc', label: 'Name (A-Z)', icon: 'text-outline' },
-                { id: 'name-desc', label: 'Name (Z-A)', icon: 'text-outline' },
-                { id: 'role', label: 'Role', icon: 'people-outline' },
-                { id: 'newest', label: 'Newest First', icon: 'calendar-outline' },
-                { id: 'oldest', label: 'Oldest First', icon: 'calendar-outline' },
+                { id: 'name-asc', label: t('name_a_z'), icon: 'text-outline' },
+                { id: 'name-desc', label: t('name_z_a'), icon: 'text-outline' },
+                { id: 'role', label: t('role'), icon: 'people-outline' },
+                { id: 'newest', label: t('newest_first'), icon: 'calendar-outline' },
+                { id: 'oldest', label: t('oldest_first'), icon: 'calendar-outline' },
               ].map(opt => (
                 <TouchableOpacity 
                   key={opt.id} 

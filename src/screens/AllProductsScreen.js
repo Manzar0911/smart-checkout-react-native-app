@@ -13,6 +13,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { PRODUCTS } from '../data/products';
 import { productsAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
@@ -22,6 +23,7 @@ const { width } = Dimensions.get('window');
 
 const AllProductsScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const styles = getStyles(COLORS);
   const { addItem, itemCount } = useCart();
   const { user } = useAuth();
@@ -102,7 +104,7 @@ const AllProductsScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Packaged Foods</Text>
+          <Text style={styles.headerTitle}>{t('packaged_foods')}</Text>
           <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate('Cart')}>
             <Ionicons name="cart-outline" size={24} color={COLORS.textPrimary} />
             {itemCount > 0 && (
@@ -116,7 +118,7 @@ const AllProductsScreen = ({ navigation }) => {
         {/* Categories / Search Placeholder */}
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color={COLORS.textMuted} />
-          <Text style={styles.searchText}>Search snacks, namkeen, crackers...</Text>
+          <Text style={styles.searchText}>{t('search_snacks_placeholder')}</Text>
         </View>
 
         <FlatList

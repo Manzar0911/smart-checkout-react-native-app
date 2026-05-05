@@ -20,12 +20,14 @@ import api from '../services/api';
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const { width, height } = Dimensions.get('window');
 
 const AdminPastBillsScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const [bills, setBills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -100,7 +102,7 @@ const AdminPastBillsScreen = ({ navigation }) => {
         total: bill.total_amount
       }, items);
     } catch (error) {
-      Alert.alert('Error', 'Failed to generate bill.');
+      Alert.alert(t('error'), 'Failed to generate bill.');
     }
   };
 
@@ -131,7 +133,7 @@ const AdminPastBillsScreen = ({ navigation }) => {
       <View style={dynamicStyles.totalContainer}>
         <Text style={dynamicStyles.billTotal}>₹{parseFloat(item.total_amount).toFixed(2)}</Text>
         <View style={dynamicStyles.viewBadge}>
-          <Text style={dynamicStyles.viewText}>View PDF</Text>
+          <Text style={dynamicStyles.viewText}>{t('view_pdf')}</Text>
           <Ionicons name="chevron-forward" size={14} color={COLORS.primary} />
         </View>
       </View>
@@ -147,7 +149,7 @@ const AdminPastBillsScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={dynamicStyles.headerTitle}>Past Vendor Bills</Text>
+            <Text style={dynamicStyles.headerTitle}>{t('past_vendor_bills')}</Text>
             <View style={{ width: 40 }} />
           </View>
 
@@ -156,7 +158,7 @@ const AdminPastBillsScreen = ({ navigation }) => {
               <Ionicons name="search" size={20} color={COLORS.textMuted} style={dynamicStyles.searchIcon} />
               <TextInput
                 style={dynamicStyles.searchInput}
-                placeholder="Search vendor or invoice..."
+                placeholder={t('search_vendor_invoice')}
                 placeholderTextColor={COLORS.textMuted}
                 value={search}
                 onChangeText={setSearch}
@@ -176,7 +178,7 @@ const AdminPastBillsScreen = ({ navigation }) => {
               renderItem={({ item }) => <BillItem item={item} />}
               contentContainerStyle={dynamicStyles.listContent}
               showsVerticalScrollIndicator={false}
-              ListEmptyComponent={<Text style={dynamicStyles.emptyText}>No bills found</Text>}
+              ListEmptyComponent={<Text style={dynamicStyles.emptyText}>{t('no_bills_found')}</Text>}
             />
           )}
 
@@ -185,17 +187,17 @@ const AdminPastBillsScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.modalOverlay} onPress={() => setShowSortDrawer(false)} />
             <View style={dynamicStyles.sortDrawer}>
               <View style={dynamicStyles.drawerHeader}>
-                <Text style={dynamicStyles.drawerTitle}>Sort Bills</Text>
+                <Text style={dynamicStyles.drawerTitle}>{t('sort_bills')}</Text>
                 <TouchableOpacity onPress={() => setShowSortDrawer(false)}>
                   <Ionicons name="close" size={24} color={COLORS.textPrimary} />
                 </TouchableOpacity>
               </View>
               {[
-                { id: 'newest', label: 'Newest First', icon: 'calendar-outline' },
-                { id: 'oldest', label: 'Oldest First', icon: 'calendar-outline' },
-                { id: 'total-high', label: 'Total (High to Low)', icon: 'trending-down-outline' },
-                { id: 'total-low', label: 'Total (Low to High)', icon: 'trending-up-outline' },
-                { id: 'vendor-az', label: 'Vendor Name (A-Z)', icon: 'text-outline' },
+                { id: 'newest', label: t('newest_first'), icon: 'calendar-outline' },
+                { id: 'oldest', label: t('oldest_first'), icon: 'calendar-outline' },
+                { id: 'total-high', label: t('total_high_low'), icon: 'trending-down-outline' },
+                { id: 'total-low', label: t('total_low_high'), icon: 'trending-up-outline' },
+                { id: 'vendor-az', label: t('vendor_name_a_z'), icon: 'text-outline' },
               ].map(opt => (
                 <TouchableOpacity 
                   key={opt.id} 

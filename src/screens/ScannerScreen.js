@@ -19,10 +19,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS as STATIC_COLORS, FONTS, SIZES, SHADOWS } from '../theme';
 import { useCart } from '../context/CartContext';
-import { productsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { getRandomProduct } from '../data/products';
+import { productsAPI } from '../services/api';
 
 const { width, height } = Dimensions.get('window');
 
@@ -31,6 +32,7 @@ const ScannerScreen = ({ navigation }) => {
   const { addItem, itemCount } = useCart();
   const { user } = useAuth();
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const [permission, requestPermission] = useCameraPermissions();
   const [isScanning, setIsScanning] = useState(true);
   const [hasScanned, setHasScanned] = useState(false);
@@ -218,8 +220,8 @@ const ScannerScreen = ({ navigation }) => {
             </TouchableOpacity>
 
             <View style={dynamicStyles.headerCenter}>
-              <Text style={dynamicStyles.headerTitle}>Scan Snack</Text>
-              <Text style={dynamicStyles.headerSubtitle}>Align barcode within frame</Text>
+              <Text style={dynamicStyles.headerTitle}>{t('scan_snack_title')}</Text>
+              <Text style={dynamicStyles.headerSubtitle}>{t('align_barcode')}</Text>
             </View>
 
             <TouchableOpacity
@@ -276,12 +278,12 @@ const ScannerScreen = ({ navigation }) => {
                 <View style={dynamicStyles.successIconBg}>
                   <Ionicons name="checkmark" size={40} color={COLORS.white} />
                 </View>
-                <Text style={dynamicStyles.successText}>Scanned!</Text>
+                <Text style={dynamicStyles.successText}>{t('scanned')}</Text>
               </Animated.View>
             </View>
 
             <Animated.Text style={[dynamicStyles.instructions, { opacity: fadeIn }]}>
-              Center the barcode in the frame to scan automatically
+              {t('center_barcode')}
             </Animated.Text>
           </View>
 
@@ -289,7 +291,7 @@ const ScannerScreen = ({ navigation }) => {
           <Animated.View style={[dynamicStyles.bottomTools, { opacity: fadeIn }]}>
             <TouchableOpacity style={dynamicStyles.toolBtn}>
               <Ionicons name="flash-outline" size={24} color={COLORS.white} />
-              <Text style={dynamicStyles.toolText}>Flash</Text>
+              <Text style={dynamicStyles.toolText}>{t('flash')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={dynamicStyles.scanTriggerBtn}
@@ -303,7 +305,7 @@ const ScannerScreen = ({ navigation }) => {
             </TouchableOpacity>
             <TouchableOpacity style={dynamicStyles.toolBtn}>
               <Ionicons name="image-outline" size={24} color={COLORS.white} />
-              <Text style={dynamicStyles.toolText}>Gallery</Text>
+              <Text style={dynamicStyles.toolText}>{t('gallery')}</Text>
             </TouchableOpacity>
           </Animated.View>
 
@@ -378,7 +380,7 @@ const ScannerScreen = ({ navigation }) => {
                             hideProduct();
                           }}
                         >
-                          <Text style={dynamicStyles.rescanText}>Cancel</Text>
+                          <Text style={dynamicStyles.rescanText}>{t('cancel')}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -407,7 +409,7 @@ const ScannerScreen = ({ navigation }) => {
                             end={{ x: 1, y: 0 }}
                           >
                             <Ionicons name="cart" size={22} color={COLORS.white} />
-                            <Text style={dynamicStyles.addToCartText}>Add to Cart</Text>
+                            <Text style={dynamicStyles.addToCartText}>{t('add_to_cart')}</Text>
                           </LinearGradient>
                         </TouchableOpacity>
                       </View>

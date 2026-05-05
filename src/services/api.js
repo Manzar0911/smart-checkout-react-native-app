@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Change this to your machine's IP if testing on physical device
-// e.g., 'http://192.168.1.64:5000'
+// Production: 'https://smart-checkout-app-apis.onrender.com'
+// const BASE_URL = 'http://192.168.31.171:5000';
+// const BASE_URL = 'http://localhost:5000';
 const BASE_URL = 'https://smart-checkout-app-apis.onrender.com';
 
 const TOKEN_KEY = 'smart_self_checkout_auth_token';
@@ -195,4 +197,12 @@ export const uploadAPI = {
     }
     return data;
   }
+};
+
+// --- Inventory API ---
+export const inventoryAPI = {
+  getProducts: () => apiCall('/api/inventory/products'),
+  updateStock: (data) => api.post('/api/inventory/update', data),
+  getHistory: (page = 1, limit = 20, productId = null) =>
+    apiCall(`/api/inventory/history?page=${page}&limit=${limit}${productId ? `&productId=${productId}` : ''}`),
 };

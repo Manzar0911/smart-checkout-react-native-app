@@ -21,10 +21,12 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 
 const AdminBarcodeScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState(null);
@@ -32,7 +34,7 @@ const AdminBarcodeScreen = ({ navigation }) => {
   const [searchProductText, setSearchProductText] = useState('');
   const [showProductDropdown, setShowProductDropdown] = useState(false);
   const [barcodeForm, setBarcodeForm] = useState({
-    mfgDate: new Date(), expiryDate: new Date(), stockQuantity: '',
+    mfgDate: new Date(), expiryDate: new Date(),
   });
   const [showMfgPicker, setShowMfgPicker] = useState(false);
   const [showExpPicker, setShowExpPicker] = useState(false);
@@ -52,8 +54,8 @@ const AdminBarcodeScreen = ({ navigation }) => {
   };
 
   const handleGenerateBarcode = async () => {
-    if (!selectedProductId || !barcodeForm.stockQuantity) {
-      Alert.alert('Error', 'Please select a product and enter stock quantity.');
+    if (!selectedProductId) {
+      Alert.alert(t('error'), t('select_product_error'));
       return;
     }
     setLoading(true);
@@ -65,9 +67,9 @@ const AdminBarcodeScreen = ({ navigation }) => {
       };
       const response = await api.post(`/api/products/${selectedProductId}/barcode`, payload);
       setGeneratedBarcode(response.barcode);
-      Alert.alert('Success', 'Stock updated. Barcode generated.', [{ text: 'OK' }]);
+      Alert.alert(t('success'), t('barcode_generated'), [{ text: 'OK' }]);
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to update stock.');
+      Alert.alert(t('error'), error.message || t('failed_update_stock'));
     } finally {
       setLoading(false);
     }
@@ -107,7 +109,7 @@ const AdminBarcodeScreen = ({ navigation }) => {
       const html = getBarcodeHtml(generatedBarcode, selectedProductName);
       await Print.printAsync({ html });
     } catch (error) {
-      Alert.alert('Print Error', 'Could not print barcode.');
+      Alert.alert(t('print_error'), t('cannot_print'));
     }
   };
 
@@ -118,7 +120,7 @@ const AdminBarcodeScreen = ({ navigation }) => {
       const { uri } = await Print.printToFileAsync({ html });
       await shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
     } catch (error) {
-      Alert.alert('Share Error', 'Could not share barcode.');
+      Alert.alert(t('share_error'), t('cannot_share'));
     }
   };
 
@@ -136,7 +138,7 @@ const AdminBarcodeScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={dynamicStyles.headerTitle}>Generate Barcode</Text>
+            <Text style={dynamicStyles.headerTitle}>{t('generate_barcode')}</Text>
             <View style={{ width: 40 }} />
           </View>
 
@@ -146,11 +148,11 @@ const AdminBarcodeScreen = ({ navigation }) => {
             keyboardShouldPersistTaps="handled"
           >
             <View style={dynamicStyles.formCard}>
-              <Text style={dynamicStyles.label}>Select Product</Text>
+              <Text style={dynamicStyles.label}>{t('select_product')}</Text>
               <View style={{ zIndex: 1000 }}>
                 <TextInput 
                   style={dynamicStyles.input} 
-                  placeholder="Type to search product..." 
+                  placeholder={t('type_to_search')} 
                   placeholderTextColor={COLORS.textMuted} 
                   value={searchProductText} 
                   onChangeText={(text) => {
@@ -184,7 +186,7 @@ const AdminBarcodeScreen = ({ navigation }) => {
                 )}
               </View>
 
-              <Text style={dynamicStyles.label}>Manufacturing Date</Text>
+              <Text style={dynamicStyles.label}>{t('manufacturing_date')}</Text>
               <TouchableOpacity style={dynamicStyles.input} onPress={() => setShowMfgPicker(true)}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={{ color: COLORS.textPrimary }}>{barcodeForm.mfgDate.toDateString()}</Text>
@@ -202,7 +204,7 @@ const AdminBarcodeScreen = ({ navigation }) => {
                 />
               )}
 
-              <Text style={dynamicStyles.label}>Expiry Date</Text>
+              <Text style={dynamicStyles.label}>{t('expiry_date')}</Text>
               <TouchableOpacity style={dynamicStyles.input} onPress={() => setShowExpPicker(true)}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                   <Text style={{ color: COLORS.textPrimary }}>{barcodeForm.expiryDate.toDateString()}</Text>
@@ -220,19 +222,9 @@ const AdminBarcodeScreen = ({ navigation }) => {
                 />
               )}
 
-              <Text style={dynamicStyles.label}>Stock Quantity to Add</Text>
-              <TextInput 
-                style={dynamicStyles.input} 
-                placeholder="Enter quantity"
-                placeholderTextColor={COLORS.textMuted} 
-                keyboardType="numeric" 
-                value={barcodeForm.stockQuantity} 
-                onChangeText={(t) => setBarcodeForm({ ...barcodeForm, stockQuantity: t })} 
-              />
-
               <TouchableOpacity style={dynamicStyles.submitBtn} onPress={handleGenerateBarcode} disabled={loading}>
                 <LinearGradient colors={['#3498db', '#2980b9']} style={dynamicStyles.submitBtnGradient}>
-                  {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>Generate & Update Stock</Text>}
+                  {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{t('generate_barcode')}</Text>}
                 </LinearGradient>
               </TouchableOpacity>
 
@@ -246,11 +238,11 @@ const AdminBarcodeScreen = ({ navigation }) => {
                   <View style={dynamicStyles.actionRow}>
                     <TouchableOpacity style={dynamicStyles.printBtn} onPress={handlePrintBarcode}>
                       <Ionicons name="print-outline" size={20} color={COLORS.white} />
-                      <Text style={dynamicStyles.actionBtnText}>Print</Text>
+                      <Text style={dynamicStyles.actionBtnText}>{t('print')}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={dynamicStyles.shareBtn} onPress={handleShareBarcode}>
                       <Ionicons name="share-outline" size={20} color={COLORS.white} />
-                      <Text style={dynamicStyles.actionBtnText}>Share</Text>
+                      <Text style={dynamicStyles.actionBtnText}>{t('share')}</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -291,4 +283,3 @@ const getStyles = (COLORS) => StyleSheet.create({
 });
 
 export default AdminBarcodeScreen;
-

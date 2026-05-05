@@ -16,12 +16,14 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { ordersAPI } from '../services/api';
 
 const { width, height } = Dimensions.get('window');
 
 const ExitVerificationScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const styles = getStyles(COLORS);
   const [permission, requestPermission] = useCameraPermissions();
   
@@ -74,13 +76,13 @@ const ExitVerificationScreen = ({ navigation }) => {
         setOrderData(response.order);
         setVerificationState('displaying');
       } else {
-        Alert.alert('Error', 'Order not found.', [
-          { text: 'OK', onPress: () => setVerificationState('scanning') }
+        Alert.alert(t('error'), 'Order not found.', [
+          { text: t('ok'), onPress: () => setVerificationState('scanning') }
         ]);
       }
     } catch (error) {
-      Alert.alert('Error', 'Could not verify the order.', [
-        { text: 'OK', onPress: () => setVerificationState('scanning') }
+      Alert.alert(t('error'), 'Could not verify the order.', [
+        { text: t('ok'), onPress: () => setVerificationState('scanning') }
       ]);
     }
   };
@@ -96,7 +98,7 @@ const ExitVerificationScreen = ({ navigation }) => {
         useNativeDriver: true,
       }).start();
     } catch (error) {
-      Alert.alert('Error', 'Failed to verify bill.');
+      Alert.alert(t('error'), 'Failed to verify bill.');
     }
   };
 
@@ -127,7 +129,7 @@ const ExitVerificationScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Verify Exit</Text>
+          <Text style={styles.headerTitle}>{t('verify_exit')}</Text>
           <View style={{ width: 40 }} />
         </View>
 
@@ -147,7 +149,7 @@ const ExitVerificationScreen = ({ navigation }) => {
                 {verificationState === 'verifying' ? (
                   <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.7)', alignItems: 'center', justifyContent: 'center', borderRadius: 20 }]}>
                     <ActivityIndicator size="large" color={COLORS.primary} />
-                    <Text style={{ color: COLORS.white, marginTop: 10, ...FONTS.medium }}>Fetching Order...</Text>
+                    <Text style={{ color: COLORS.white, marginTop: 10, ...FONTS.medium }}>{t('fetching_order')}</Text>
                   </View>
                 ) : (
                   <Animated.View
@@ -166,7 +168,7 @@ const ExitVerificationScreen = ({ navigation }) => {
                 )}
               </View>
               <Text style={styles.instructions}>
-                Scan the customer's QR code from their receipt
+                {t('scan_customer_qr')}
               </Text>
             </View>
           </View>
@@ -179,21 +181,21 @@ const ExitVerificationScreen = ({ navigation }) => {
                     <Ionicons name="shield-checkmark" size={60} color={COLORS.white} />
                   </LinearGradient>
                 </Animated.View>
-                <Text style={styles.verifiedTitle}>Bill Verified!</Text>
-                <Text style={styles.verifiedSubtitle}>Customer is clear to exit</Text>
+                <Text style={styles.verifiedTitle}>{t('bill_verified')}</Text>
+                <Text style={styles.verifiedSubtitle}>{t('customer_clear_exit')}</Text>
                 
                 <View style={styles.verifiedCard}>
-                  <View style={styles.verifiedRow}><Text style={styles.vLabel}>Receipt ID</Text><Text style={styles.vValue}>{orderData?.id}</Text></View>
+                  <View style={styles.verifiedRow}><Text style={styles.vLabel}>{t('receipt_id')}</Text><Text style={styles.vValue}>{orderData?.id}</Text></View>
                   <View style={styles.vDivider} />
-                  <View style={styles.verifiedRow}><Text style={styles.vLabel}>Items</Text><Text style={styles.vValue}>{orderData?.itemCount} items</Text></View>
+                  <View style={styles.verifiedRow}><Text style={styles.vLabel}>{t('items')}</Text><Text style={styles.vValue}>{orderData?.itemCount} {t('items')}</Text></View>
                   <View style={styles.vDivider} />
-                  <View style={styles.verifiedRow}><Text style={styles.vLabel}>Amount Paid</Text><Text style={[styles.vValue, { color: COLORS.success }]}>₹{orderData?.total.toFixed(2)}</Text></View>
+                  <View style={styles.verifiedRow}><Text style={styles.vLabel}>{t('amount_paid')}</Text><Text style={[styles.vValue, { color: COLORS.success }]}>₹{orderData?.total.toFixed(2)}</Text></View>
                 </View>
 
                 <TouchableOpacity style={styles.doneBtn} onPress={handleDone} activeOpacity={0.85}>
                   <LinearGradient colors={[COLORS.success, '#059669']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.doneBtnGradient}>
                     <Ionicons name="home" size={20} color={COLORS.white} />
-                    <Text style={styles.doneBtnText}>Back to Dashboard</Text>
+                    <Text style={styles.doneBtnText}>{t('back_to_dashboard')}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </Animated.View>
@@ -202,7 +204,7 @@ const ExitVerificationScreen = ({ navigation }) => {
                 <View style={styles.billCard}>
                   <View style={styles.billHeader}>
                     <Ionicons name="receipt-outline" size={18} color={COLORS.primary} />
-                    <Text style={styles.billTitle}>Order Summary: {orderData?.id}</Text>
+                    <Text style={styles.billTitle}>{t('order_summary')} {orderData?.id}</Text>
                   </View>
                   {orderData?.items.map((item, idx) => (
                     <View key={idx} style={styles.billItem}>
@@ -213,7 +215,7 @@ const ExitVerificationScreen = ({ navigation }) => {
                   ))}
                   <View style={styles.billDivider} />
                   <View style={styles.billTotalRow}>
-                    <Text style={styles.billTotalLabel}>Total Paid</Text>
+                    <Text style={styles.billTotalLabel}>{t('total_paid')}</Text>
                     <Text style={styles.billTotalValue}>₹{orderData?.total.toFixed(2)}</Text>
                   </View>
                 </View>
@@ -221,7 +223,7 @@ const ExitVerificationScreen = ({ navigation }) => {
                 <TouchableOpacity style={styles.verifyBtn} onPress={handleVerifyBill} activeOpacity={0.85}>
                   <LinearGradient colors={[COLORS.primary, '#FF4500']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }} style={styles.verifyBtnGradient}>
                     <Ionicons name="shield-checkmark" size={20} color={COLORS.white} />
-                    <Text style={styles.verifyBtnText}>Verify Bill & Approve Exit</Text>
+                    <Text style={styles.verifyBtnText}>{t('verify_bill_approve_exit')}</Text>
                   </LinearGradient>
                 </TouchableOpacity>
 
@@ -229,7 +231,7 @@ const ExitVerificationScreen = ({ navigation }) => {
                   style={{ marginTop: 20, alignItems: 'center' }}
                   onPress={() => setVerificationState('scanning')}
                 >
-                  <Text style={{ color: COLORS.error, ...FONTS.bold, fontSize: SIZES.md }}>Cancel</Text>
+                  <Text style={{ color: COLORS.error, ...FONTS.bold, fontSize: SIZES.md }}>{t('cancel')}</Text>
                 </TouchableOpacity>
               </Animated.View>
             )}

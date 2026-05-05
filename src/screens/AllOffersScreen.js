@@ -12,6 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { OFFERS } from '../data/products';
 import { offersAPI } from '../services/api';
 import { useCart } from '../context/CartContext';
@@ -20,6 +21,7 @@ const { width } = Dimensions.get('window');
 
 const AllOffersScreen = ({ navigation }) => {
   const { COLORS } = useTheme();
+  const { t } = useLanguage();
   const styles = getStyles(COLORS);
   const { applyCoupon } = useCart();
   const [offers, setOffers] = useState(OFFERS);
@@ -66,7 +68,7 @@ const AllOffersScreen = ({ navigation }) => {
             <Text style={styles.offerSubtitle}>{item.subtitle}</Text>
             <View style={styles.codeContainer}>
               <Text style={styles.codeText}>{item.code}</Text>
-              <Text style={styles.applyLabel}>Tap to Apply</Text>
+              <Text style={styles.applyLabel}>{t('tap_to_apply')}</Text>
             </View>
           </View>
         </View>
@@ -83,7 +85,7 @@ const AllOffersScreen = ({ navigation }) => {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>Current Offers</Text>
+          <Text style={styles.headerTitle}>{t('current_offers')}</Text>
           <View style={{ width: 40 }} />
         </View>
 

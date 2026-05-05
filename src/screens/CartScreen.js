@@ -19,6 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import { useLanguage } from '../context/LanguageContext';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import { OFFERS } from '../data/products';
 import { offersAPI, authAPI } from '../services/api';
@@ -45,6 +46,7 @@ const CartScreen = ({ navigation }) => {
   
   const { COLORS } = useTheme();
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const isAdminOrEmployee = user?.role === 'admin' || user?.role === 'employee';
 
@@ -59,7 +61,7 @@ const CartScreen = ({ navigation }) => {
   const handleApplyCoupon = async () => {
     const success = await applyCoupon(couponCode);
     if (!success) {
-      setCouponError('Invalid coupon code');
+      setCouponError(t('invalid_coupon'));
       setErrorVisible(true);
       setTimeout(() => setErrorVisible(false), 2000);
     } else {
@@ -130,8 +132,8 @@ const CartScreen = ({ navigation }) => {
             <Ionicons name="chevron-back" size={24} color={COLORS.textPrimary} />
           </TouchableOpacity>
           <View style={dynamicStyles.headerCenter}>
-            <Text style={dynamicStyles.headerTitle}>My Cart</Text>
-            <Text style={dynamicStyles.headerSubtitle}>{items.length} snacks</Text>
+            <Text style={dynamicStyles.headerTitle}>{t('my_cart')}</Text>
+            <Text style={dynamicStyles.headerSubtitle}>{items.length} {t('snacks')}</Text>
           </View>
           <View style={{ width: 40 }} />
         </View>
@@ -142,9 +144,9 @@ const CartScreen = ({ navigation }) => {
             <View style={dynamicStyles.emptyIconContainer}>
               <Ionicons name="cart-outline" size={60} color={COLORS.primary} />
             </View>
-            <Text style={dynamicStyles.emptyTitle}>Your cart is empty</Text>
+            <Text style={dynamicStyles.emptyTitle}>{t('cart_empty')}</Text>
             <Text style={dynamicStyles.emptySubtitle}>
-              Scan some delicious snacks and they will magically appear here!
+              {t('cart_empty_subtitle')}
             </Text>
             <TouchableOpacity 
               style={dynamicStyles.scanNowBtn}
@@ -158,7 +160,7 @@ const CartScreen = ({ navigation }) => {
                 end={{ x: 1, y: 0 }}
               >
                 <Ionicons name="scan" size={24} color={COLORS.white} />
-                <Text style={dynamicStyles.scanNowText}>Scan a Snack</Text>
+                <Text style={dynamicStyles.scanNowText}>{t('scan_snack')}</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -222,7 +224,7 @@ const CartScreen = ({ navigation }) => {
 
               {/* Coupon Section */}
               <View style={dynamicStyles.couponSection}>
-                <Text style={dynamicStyles.couponSectionTitle}>Promo Code</Text>
+                <Text style={dynamicStyles.couponSectionTitle}>{t('promo_code')}</Text>
                 
                 {coupon ? (
                   <View style={dynamicStyles.appliedCoupon}>
@@ -238,7 +240,7 @@ const CartScreen = ({ navigation }) => {
                       </View>
                     </View>
                     <TouchableOpacity onPress={removeCoupon}>
-                      <Text style={dynamicStyles.removeCouponText}>Remove</Text>
+                      <Text style={dynamicStyles.removeCouponText}>{t('remove')}</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -249,7 +251,7 @@ const CartScreen = ({ navigation }) => {
                           dynamicStyles.couponInput,
                           couponError ? dynamicStyles.couponInputError : null,
                         ]}
-                        placeholder="Enter code"
+                        placeholder={t('enter_code')}
                         placeholderTextColor={COLORS.textMuted}
                         value={couponCode}
                         onChangeText={(text) => {
@@ -263,7 +265,7 @@ const CartScreen = ({ navigation }) => {
                         onPress={handleApplyCoupon}
                         disabled={!couponCode.trim()}
                       >
-                        <Text style={dynamicStyles.applyBtnText}>Apply</Text>
+                        <Text style={dynamicStyles.applyBtnText}>{t('apply')}</Text>
                       </TouchableOpacity>
                     </View>
                     {couponError ? (
@@ -272,9 +274,9 @@ const CartScreen = ({ navigation }) => {
 
                     {/* Quick Offers List */}
                     <View style={dynamicStyles.quickOffersHeader}>
-                      <Text style={dynamicStyles.quickOffersTitle}>Available Offers</Text>
+                      <Text style={dynamicStyles.quickOffersTitle}>{t('available_offers')}</Text>
                       <TouchableOpacity onPress={() => navigation.navigate('AllOffers')}>
-                        <Text style={dynamicStyles.viewAllOffers}>View All</Text>
+                        <Text style={dynamicStyles.viewAllOffers}>{t('view_all')}</Text>
                       </TouchableOpacity>
                     </View>
                     
@@ -305,7 +307,7 @@ const CartScreen = ({ navigation }) => {
                     <View style={dynamicStyles.savingsLeft}>
                       <Ionicons name="sparkles" size={20} color={COLORS.secondary} />
                       <View>
-                        <Text style={dynamicStyles.savingsTitle}>Total Savings</Text>
+                        <Text style={dynamicStyles.savingsTitle}>{t('total_savings')}</Text>
                         <Text style={dynamicStyles.savingsAmount}>₹{totalSavings.toFixed(2)}</Text>
                       </View>
                     </View>
@@ -321,7 +323,7 @@ const CartScreen = ({ navigation }) => {
                 activeOpacity={0.7}
               >
                 <Ionicons name="add-circle-outline" size={20} color={COLORS.primary} />
-                <Text style={dynamicStyles.addMoreText}>Add more snacks</Text>
+                <Text style={dynamicStyles.addMoreText}>{t('add_more_snacks')}</Text>
               </TouchableOpacity>
 
             </ScrollView>
@@ -334,18 +336,18 @@ const CartScreen = ({ navigation }) => {
               >
                 <View style={dynamicStyles.checkoutInfo}>
                   <View style={dynamicStyles.checkoutRow}>
-                    <Text style={dynamicStyles.checkoutLabel}>Original Price</Text>
+                    <Text style={dynamicStyles.checkoutLabel}>{t('original_price')}</Text>
                     <Text style={dynamicStyles.checkoutValue}>₹{cartOriginalTotal.toFixed(2)}</Text>
                   </View>
                   <View style={dynamicStyles.checkoutRow}>
-                    <Text style={dynamicStyles.checkoutLabel}>Snack Savings</Text>
+                    <Text style={dynamicStyles.checkoutLabel}>{t('snack_savings')}</Text>
                     <Text style={[dynamicStyles.checkoutValue, { color: COLORS.secondary }]}>
                       -₹{(cartOriginalTotal - cartItemsTotal).toFixed(2)}
                     </Text>
                   </View>
                   {coupon && (
                     <View style={dynamicStyles.checkoutRow}>
-                      <Text style={dynamicStyles.checkoutLabel}>Coupon Savings</Text>
+                      <Text style={dynamicStyles.checkoutLabel}>{t('coupon_savings')}</Text>
                       <Text style={[dynamicStyles.checkoutValue, { color: COLORS.secondary }]}>
                         -₹{couponDiscount.toFixed(2)}
                       </Text>
@@ -353,7 +355,7 @@ const CartScreen = ({ navigation }) => {
                   )}
                   <View style={dynamicStyles.checkoutDivider} />
                   <View style={dynamicStyles.checkoutRow}>
-                    <Text style={dynamicStyles.totalLabel}>Grand Total</Text>
+                    <Text style={dynamicStyles.totalLabel}>{t('grand_total')}</Text>
                     <Text style={dynamicStyles.totalValue}>₹{cartTotal.toFixed(2)}</Text>
                   </View>
                 </View>
@@ -375,7 +377,7 @@ const CartScreen = ({ navigation }) => {
                     end={{ x: 1, y: 0 }}
                     style={dynamicStyles.checkoutBtnGradient}
                   >
-                    <Text style={dynamicStyles.checkoutBtnText}>Proceed to Pay</Text>
+                    <Text style={dynamicStyles.checkoutBtnText}>{t('proceed_to_pay')}</Text>
                     <View style={dynamicStyles.checkoutBtnArrow}>
                       <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
                     </View>
@@ -401,13 +403,13 @@ const CartScreen = ({ navigation }) => {
             <View style={dynamicStyles.modalContent}>
               <View style={dynamicStyles.modalHeader}>
                 <Ionicons name="person-circle-outline" size={30} color={COLORS.primary} />
-                <Text style={dynamicStyles.modalTitle}>Customer Details</Text>
+                <Text style={dynamicStyles.modalTitle}>{t('customer_details')}</Text>
               </View>
-              <Text style={dynamicStyles.modalSubtitle}>Please enter customer details to proceed with billing.</Text>
+              <Text style={dynamicStyles.modalSubtitle}>{t('customer_details_subtitle')}</Text>
               
               <TextInput
                 style={dynamicStyles.customerInput}
-                placeholder="Customer Phone (10 digits)"
+                placeholder={t('customer_phone')}
                 placeholderTextColor={COLORS.textMuted}
                 value={customerInfo?.phone || ''}
                 onChangeText={handlePhoneChange}
@@ -416,7 +418,7 @@ const CartScreen = ({ navigation }) => {
               />
               <TextInput
                 style={dynamicStyles.customerInput}
-                placeholder="Customer Name"
+                placeholder={t('customer_name')}
                 placeholderTextColor={COLORS.textMuted}
                 value={customerInfo?.name || ''}
                 onChangeText={handleNameChange}
@@ -427,7 +429,7 @@ const CartScreen = ({ navigation }) => {
                   style={dynamicStyles.modalCancelBtn}
                   onPress={() => setShowCustomerModal(false)}
                 >
-                  <Text style={dynamicStyles.modalCancelText}>Cancel</Text>
+                  <Text style={dynamicStyles.modalCancelText}>{t('cancel')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
                   style={[
@@ -440,7 +442,7 @@ const CartScreen = ({ navigation }) => {
                     navigation.navigate('Payment');
                   }}
                 >
-                  <Text style={dynamicStyles.modalProceedText}>Proceed</Text>
+                  <Text style={dynamicStyles.modalProceedText}>{t('proceed')}</Text>
                 </TouchableOpacity>
               </View>
             </View>
