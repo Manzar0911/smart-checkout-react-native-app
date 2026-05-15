@@ -117,7 +117,7 @@ const AdminVendorBillScreen = ({ navigation }) => {
         <div class="header"><h1>${t('tax_invoice')}</h1></div>
         <p><strong>${businessName}</strong><br>${businessAddress}<br>GSTIN: ${gstin}</p>
         <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-          <div><p>${t('billed_to')}:<br><strong>${billDetails.vendorName}</strong><br>Phone: ${billDetails.vendorPhone}</p></div>
+          <div><p>${t('billed_to')}:<br><strong>${billDetails.vendorName}</strong><br>${t('phone')}: ${billDetails.vendorPhone}</p></div>
           <div><p>${t('invoice_no')}: INV-${billDetails.id}<br>${t('date')}: ${new Date(billDetails.date).toLocaleDateString()}</p></div>
         </div>
         <table>

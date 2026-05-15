@@ -60,9 +60,53 @@ const AdminCreateProductScreen = ({ navigation, route }) => {
     }
   };
 
-  const pickImage = async () => {
+  const pickImage = () => {
+    Alert.alert(
+      t('select_image'),
+      t('choose_image_source'),
+      [
+        {
+          text: t('camera'),
+          onPress: handleCameraLaunch,
+        },
+        {
+          text: t('gallery'),
+          onPress: handleLibraryLaunch,
+        },
+        {
+          text: t('cancel'),
+          style: 'cancel',
+        },
+      ]
+    );
+  };
+
+  const handleCameraLaunch = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(t('permission_denied'), t('camera_permission_required'));
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      setLocalImages((prev) => [...prev, ...result.assets]);
+    }
+  };
+
+  const handleLibraryLaunch = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(t('permission_denied'), t('gallery_permission_required'));
+      return;
+    }
+
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsMultipleSelection: true,
       selectionLimit: 5,
       quality: 0.8,

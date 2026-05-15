@@ -176,11 +176,11 @@ const PaymentScreen = ({ navigation }) => {
       const orderRes = await paymentAPI.createOrder(cartTotal, 'INR', 'RCPT_' + Date.now());
       if (orderRes.success) {
         const options = {
-          description: 'Smart Checkout Payment',
+          description: 'Jain Namkeen Payment',
           currency: 'INR',
           key: orderRes.key,
           amount: orderRes.order.amount,
-          name: 'Smart Checkout',
+          name: 'Jain Namkeen',
           order_id: orderRes.order.id,
           prefill: {
             email: user?.email || '',

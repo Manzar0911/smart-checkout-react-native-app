@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Change this to your machine's IP if testing on physical device
 // Production: 'https://smart-checkout-app-apis.onrender.com'
 // const BASE_URL = 'http://192.168.31.171:5000';
-// const BASE_URL = 'http://localhost:5000';
+// const BASE_URL = 'https://fe36-152-59-34-147.ngrok-free.app';
 const BASE_URL = 'https://smart-checkout-app-apis.onrender.com';
 
 const TOKEN_KEY = 'smart_self_checkout_auth_token';

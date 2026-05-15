@@ -99,7 +99,7 @@ const ProfileScreen = ({ navigation }) => {
               </View>
             ) : (
               <View style={dynamicStyles.infoSection}>
-                <Text style={dynamicStyles.userName}>{user?.name || 'Smart Checkout User'}</Text>
+                <Text style={dynamicStyles.userName}>{user?.name || 'Jain Namkeen User'}</Text>
                 <Text style={dynamicStyles.userPhone}>{user?.phone || t('no_phone')}</Text>
                 {user?.email && <Text style={dynamicStyles.userEmail}>{user.email}</Text>}
                 {user?.address && (

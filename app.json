@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Smart Checkout",
-    "slug": "smart-self-checkout-system",
+    "name": "Jain Namkeen",
+    "slug": "jain-namkeen",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -26,7 +26,9 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "CAMERA",
-        "RECORD_AUDIO"
+        "RECORD_AUDIO",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ],
       "package": "com.manzar0911.smartselfcheckoutsystem"
     },
@@ -37,24 +39,31 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Smart Checkout to access your camera to scan barcodes."
+          "cameraPermission": "Allow Jain Namkeen to access your camera to scan barcodes."
         }
       ],
       "expo-font",
       "@react-native-community/datetimepicker",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 24
+          }
+        }
+      ]
     ],
+    "updates": {
+      "enabled": false
+    },
     "extra": {
       "eas": {
-        "projectId": "92a9cbc4-c2d7-4cf0-94e0-c4a2ce4c6043"
+        "projectId": "e1a8839e-6918-4428-aeea-afcc6e1db845"
       }
     },
-    "owner": "manzar0911",
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
-    "updates": {
-      "url": "https://u.expo.dev/92a9cbc4-c2d7-4cf0-94e0-c4a2ce4c6043"
-    }
+    "owner": "dwivedimanjul"
   }
 }

@@ -24,6 +24,8 @@ import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import { getRandomProduct } from '../data/products';
 import { productsAPI } from '../services/api';
+import * as ImagePicker from 'expo-image-picker';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -39,6 +41,9 @@ const ScannerScreen = ({ navigation }) => {
   const [scannedProduct, setScannedProduct] = useState(null);
   const [showProductModal, setShowProductModal] = useState(false);
   const [productsList, setProductsList] = useState([]);
+  const [torch, setTorch] = useState(false);
+  const [isPickingImage, setIsPickingImage] = useState(false);
+
 
   // Fetch products list for scanning
   useEffect(() => {
@@ -179,6 +184,45 @@ const ScannerScreen = ({ navigation }) => {
       setHasScanned(false);
     });
   };
+  
+  const toggleFlash = () => {
+    setTorch(prev => !prev);
+  };
+
+  const pickImage = async () => {
+    if (isPickingImage) return;
+    setIsPickingImage(true);
+    
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('error'), 'Permission to access gallery is required');
+        setIsPickingImage(false);
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        // Since Expo Go doesn't support native barcode scanning from static images 
+        // without a custom build, we show a helpful message instead of crashing.
+        Alert.alert(
+          'Notice', 
+          'Scanning from gallery requires a production build. Please use the live camera for now.'
+        );
+      }
+    } catch (error) {
+      console.log('Error picking image:', error);
+      Alert.alert(t('error'), 'Failed to process image');
+    } finally {
+      setIsPickingImage(false);
+    }
+  };
+
 
   const dynamicStyles = getStyles(COLORS);
 
@@ -203,6 +247,7 @@ const ScannerScreen = ({ navigation }) => {
           <CameraView 
             style={StyleSheet.absoluteFillObject}
             facing="back"
+            enableTorch={torch}
             barcodeScannerSettings={{
               barcodeTypes: ['code128', 'ean13', 'ean8', 'qr', 'upc_a', 'upc_e'],
             }}
@@ -289,9 +334,12 @@ const ScannerScreen = ({ navigation }) => {
 
           {/* Bottom Tools */}
           <Animated.View style={[dynamicStyles.bottomTools, { opacity: fadeIn }]}>
-            <TouchableOpacity style={dynamicStyles.toolBtn}>
-              <Ionicons name="flash-outline" size={24} color={COLORS.white} />
-              <Text style={dynamicStyles.toolText}>{t('flash')}</Text>
+            <TouchableOpacity 
+              style={dynamicStyles.toolBtn}
+              onPress={toggleFlash}
+            >
+              <Ionicons name={torch ? "flash" : "flash-outline"} size={24} color={torch ? COLORS.primary : COLORS.white} />
+              <Text style={[dynamicStyles.toolText, torch && { color: COLORS.primary }]}>{t('flash')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={dynamicStyles.scanTriggerBtn}
@@ -303,8 +351,16 @@ const ScannerScreen = ({ navigation }) => {
             >
               <Ionicons name="barcode-outline" size={32} color={COLORS.white} />
             </TouchableOpacity>
-            <TouchableOpacity style={dynamicStyles.toolBtn}>
-              <Ionicons name="image-outline" size={24} color={COLORS.white} />
+            <TouchableOpacity 
+              style={dynamicStyles.toolBtn}
+              onPress={pickImage}
+              disabled={isPickingImage}
+            >
+              {isPickingImage ? (
+                <ActivityIndicator size="small" color={COLORS.white} />
+              ) : (
+                <Ionicons name="image-outline" size={24} color={COLORS.white} />
+              )}
               <Text style={dynamicStyles.toolText}>{t('gallery')}</Text>
             </TouchableOpacity>
           </Animated.View>

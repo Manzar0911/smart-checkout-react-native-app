@@ -96,7 +96,7 @@ const ReceiptScreen = ({ navigation }) => {
   const handleShare = async () => {
     try {
       const receiptText = `
-🧾 Smart Checkout Receipt
+🧾 Jain Namkeen Receipt
 ━━━━━━━━━━━━━━━━━
 Receipt: ${receipt?.id || 'N/A'}
 Date: ${receipt?.date || 'N/A'} | ${receipt?.time || 'N/A'}
@@ -158,7 +158,7 @@ Transaction: ${receipt?.transactionId || 'N/A'}
               >
                 <Ionicons name="cart" size={24} color={COLORS.white} />
               </LinearGradient>
-              <Text style={styles.storeName}>Smart Checkout</Text>
+              <Text style={styles.storeName}>Jain Namkeen</Text>
               <Text style={styles.storeAddress}>Retail Digital Receipt</Text>
             </View>
 
@@ -285,7 +285,7 @@ Transaction: ${receipt?.transactionId || 'N/A'}
             <View style={styles.receiptFooter}>
               <Text style={styles.footerText}>{t('thank_you_shopping')}</Text>
               <Text style={styles.footerSubtext}>
-                Smart Checkout • {t('powered_by_ai')}
+                Jain Namkeen • {t('powered_by_ai')}
               </Text>
             </View>
           </Animated.View>
