@@ -25,6 +25,9 @@ import * as Print from 'expo-print';
 import { shareAsync } from 'expo-sharing';
 import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
+import { CameraView, useCameraPermissions, scanFromURLAsync } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import { productsAPI } from '../services/api';
 import { FONTS, SIZES, SHADOWS } from '../theme';
 import {
   DATE_TYPES,
@@ -78,6 +81,16 @@ const AdminBarcodeScreen = ({ navigation }) => {
   });
 
   const yearListRef = useRef(null);
+
+  // ─── Barcode Mode State (generate vs map_existing) ───
+  const [barcodeMode, setBarcodeMode] = useState('generate');
+  const [existingBarcodeValue, setExistingBarcodeValue] = useState('');
+  const [showScannerModal, setShowScannerModal] = useState(false);
+  const [scannerScanned, setScannerScanned] = useState(false);
+  const [mapLoading, setMapLoading] = useState(false);
+  const [barcodeSource, setBarcodeSource] = useState(null); // 'generated' or 'mapped'
+  const [isPickingImage, setIsPickingImage] = useState(false);
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
 
   useEffect(() => {
     fetchProducts();
@@ -169,12 +182,136 @@ const AdminBarcodeScreen = ({ navigation }) => {
       };
       const response = await api.post(`/api/products/${selectedProductId}/barcode`, payload);
       setGeneratedBarcode(response.barcode);
+      setBarcodeSource('generated');
       Alert.alert(t('success'), t('barcode_generated'), [{ text: 'OK' }]);
     } catch (error) {
       Alert.alert(t('error'), error.message || t('failed_update_stock'));
     } finally {
       setLoading(false);
     }
+  };
+
+  // ─── Handle Map Existing Barcode ───
+  const handleMapBarcode = async () => {
+    if (!selectedProductId) {
+      Alert.alert(t('error'), t('select_product_error'));
+      return;
+    }
+    const trimmed = existingBarcodeValue.trim();
+    if (!trimmed) {
+      Alert.alert(t('error'), t('barcode_required'));
+      return;
+    }
+    if (trimmed.length > 50) {
+      Alert.alert(t('error'), t('barcode_too_long'));
+      return;
+    }
+    if (!/^[a-zA-Z0-9\-\.]+$/.test(trimmed)) {
+      Alert.alert(t('error'), t('barcode_invalid_chars'));
+      return;
+    }
+
+    const formattedMfg = getFormattedMfgDate();
+    const mfgValidation = validateDateByType(formattedMfg, mfgDateType);
+    if (!mfgValidation.valid) {
+      Alert.alert(t('error'), t(mfgValidation.error) || t('mfg_date_required'));
+      return;
+    }
+    const formattedExp = getFormattedExpDate();
+    const expValidation = validateDateByType(formattedExp, expDateType);
+    if (!expValidation.valid) {
+      Alert.alert(t('error'), t(expValidation.error) || t('exp_date_required'));
+      return;
+    }
+    const comparison = compareFlexibleDates(formattedMfg, mfgDateType, formattedExp, expDateType);
+    if (!comparison.valid) {
+      Alert.alert(t('error'), t(comparison.error) || t('expiry_before_mfg'));
+      return;
+    }
+
+    setMapLoading(true);
+    try {
+      const payload = {
+        productId: selectedProductId,
+        barcodeValue: trimmed,
+        manufacturing_date: formattedMfg,
+        manufacturing_date_type: mfgDateType,
+        expiry_date: formattedExp,
+        expiry_date_type: expDateType,
+      };
+      const response = await productsAPI.mapBarcode(payload);
+      setGeneratedBarcode(response.barcode || trimmed);
+      setBarcodeSource('mapped');
+      Alert.alert(t('success'), t('barcode_mapped_success'), [{ text: 'OK' }]);
+    } catch (error) {
+      const msg = error.message || '';
+      if (msg.includes('already mapped to this product')) {
+        Alert.alert(t('error'), t('barcode_already_mapped_same'));
+      } else if (msg.includes('already mapped to another')) {
+        Alert.alert(t('error'), t('barcode_already_mapped_other'));
+      } else {
+        Alert.alert(t('error'), msg || t('failed_update_stock'));
+      }
+    } finally {
+      setMapLoading(false);
+    }
+  };
+
+  // ─── Handle Scanner Barcode (for map existing flow) ───
+  const handleScannerBarcode = ({ type, data }) => {
+    if (scannerScanned) return;
+    setScannerScanned(true);
+    setExistingBarcodeValue(data);
+    setShowScannerModal(false);
+    setScannerScanned(false);
+  };
+
+  const pickImageFromGallery = async () => {
+    if (isPickingImage) return;
+    
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('error'), t('gallery_permission_required'));
+        return;
+      }
+
+      setIsPickingImage(true);
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        const uri = result.assets[0].uri;
+        const results = await scanFromURLAsync(uri, ['code128', 'ean13', 'ean8', 'qr', 'upc_a', 'upc_e']);
+        
+        if (results && results.length > 0) {
+          setExistingBarcodeValue(results[0].data);
+          Alert.alert(t('success'), t('barcode_detected'));
+        } else {
+          Alert.alert(t('error'), t('no_barcode_found'));
+        }
+      }
+    } catch (error) {
+      console.log('Error picking image:', error);
+      Alert.alert(t('error'), t('no_barcode_found'));
+    } finally {
+      setIsPickingImage(false);
+    }
+  };
+
+  const openScannerModal = async () => {
+    if (!cameraPermission?.granted) {
+      const result = await requestCameraPermission();
+      if (!result.granted) {
+        Alert.alert(t('error'), t('camera_permission_required'));
+        return;
+      }
+    }
+    setScannerScanned(false);
+    setShowScannerModal(true);
   };
 
   const getBarcodeHtml = (barcodeValue, productName) => `
@@ -383,7 +520,7 @@ const AdminBarcodeScreen = ({ navigation }) => {
             <TouchableOpacity style={dynamicStyles.backBtn} onPress={() => navigation.goBack()}>
               <Ionicons name="arrow-back" size={24} color={COLORS.textPrimary} />
             </TouchableOpacity>
-            <Text style={dynamicStyles.headerTitle}>{t('generate_barcode')}</Text>
+            <Text style={dynamicStyles.headerTitle}>{barcodeMode === 'generate' ? t('generate_barcode') : t('map_existing_barcode')}</Text>
             <View style={{ width: 40 }} />
           </View>
 
@@ -392,7 +529,32 @@ const AdminBarcodeScreen = ({ navigation }) => {
             contentContainerStyle={dynamicStyles.scrollContent}
             keyboardShouldPersistTaps="handled"
           >
+            {/* ─── Mode Toggle ─── */}
+            <View style={dynamicStyles.modeToggleContainer}>
+              <TouchableOpacity
+                style={[dynamicStyles.modeToggleBtn, barcodeMode === 'generate' && dynamicStyles.modeToggleBtnActive]}
+                onPress={() => { setBarcodeMode('generate'); setGeneratedBarcode(null); setBarcodeSource(null); }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="barcode-outline" size={18} color={barcodeMode === 'generate' ? COLORS.white : COLORS.textMuted} />
+                <Text style={[dynamicStyles.modeToggleText, barcodeMode === 'generate' && dynamicStyles.modeToggleTextActive]}>
+                  {t('generate_new_barcode')}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[dynamicStyles.modeToggleBtn, barcodeMode === 'map_existing' && dynamicStyles.modeToggleBtnActive]}
+                onPress={() => { setBarcodeMode('map_existing'); setGeneratedBarcode(null); setBarcodeSource(null); }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="link-outline" size={18} color={barcodeMode === 'map_existing' ? COLORS.white : COLORS.textMuted} />
+                <Text style={[dynamicStyles.modeToggleText, barcodeMode === 'map_existing' && dynamicStyles.modeToggleTextActive]}>
+                  {t('map_existing_barcode')}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
             <View style={dynamicStyles.formCard}>
+              {/* ─── Product Selector (shared) ─── */}
               <Text style={dynamicStyles.label}>{t('select_product')}</Text>
               <View style={{ zIndex: 1000 }}>
                 <TextInput 
@@ -431,7 +593,43 @@ const AdminBarcodeScreen = ({ navigation }) => {
                 )}
               </View>
 
-              {/* ─── Manufacturing Date ─── */}
+              {/* ─── Existing Barcode Input (map_existing mode only) ─── */}
+              {barcodeMode === 'map_existing' && (
+                <>
+                  <Text style={dynamicStyles.sectionLabel}>{t('existing_barcode')}</Text>
+                  <TextInput
+                    style={dynamicStyles.input}
+                    placeholder={t('enter_barcode_value')}
+                    placeholderTextColor={COLORS.textMuted}
+                    value={existingBarcodeValue}
+                    onChangeText={setExistingBarcodeValue}
+                    autoCapitalize="none"
+                    maxLength={50}
+                  />
+                  <TouchableOpacity style={dynamicStyles.scanBtn} onPress={openScannerModal} activeOpacity={0.7}>
+                    <Ionicons name="scan-outline" size={20} color={COLORS.white} />
+                    <Text style={dynamicStyles.scanBtnText}>{t('scan_barcode')}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity 
+                    style={[dynamicStyles.scanBtn, { backgroundColor: COLORS.secondary, marginTop: 8 }]} 
+                    onPress={pickImageFromGallery} 
+                    activeOpacity={0.7}
+                    disabled={isPickingImage}
+                  >
+                    {isPickingImage ? (
+                      <ActivityIndicator size="small" color={COLORS.white} />
+                    ) : (
+                      <>
+                        <Ionicons name="image-outline" size={20} color={COLORS.white} />
+                        <Text style={dynamicStyles.scanBtnText}>{t('scan_from_gallery')}</Text>
+                      </>
+                    )}
+                  </TouchableOpacity>
+                </>
+              )}
+
+              {/* ─── Manufacturing Date (shared) ─── */}
               <Text style={dynamicStyles.sectionLabel}>{t('manufacturing_date')}</Text>
               <Text style={dynamicStyles.subLabel}>{t('date_type')}</Text>
               {renderDateTypePills(mfgDateType, setMfgDateType)}
@@ -439,7 +637,7 @@ const AdminBarcodeScreen = ({ navigation }) => {
                 {renderMfgDateInput()}
               </View>
 
-              {/* ─── Expiry Date ─── */}
+              {/* ─── Expiry Date (shared) ─── */}
               <Text style={dynamicStyles.sectionLabel}>{t('expiry_date')}</Text>
               <Text style={dynamicStyles.subLabel}>{t('date_type')}</Text>
               {renderDateTypePills(expDateType, setExpDateType)}
@@ -447,19 +645,58 @@ const AdminBarcodeScreen = ({ navigation }) => {
                 {renderExpDateInput()}
               </View>
 
-              <TouchableOpacity style={dynamicStyles.submitBtn} onPress={handleGenerateBarcode} disabled={loading}>
-                <LinearGradient colors={['#3498db', '#2980b9']} style={dynamicStyles.submitBtnGradient}>
-                  {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{t('generate_barcode')}</Text>}
-                </LinearGradient>
-              </TouchableOpacity>
+              {/* ─── Action Button (mode-dependent) ─── */}
+              {barcodeMode === 'generate' ? (
+                <TouchableOpacity style={dynamicStyles.submitBtn} onPress={handleGenerateBarcode} disabled={loading}>
+                  <LinearGradient colors={['#3498db', '#2980b9']} style={dynamicStyles.submitBtnGradient}>
+                    {loading ? <ActivityIndicator color={COLORS.white} /> : <Text style={dynamicStyles.submitBtnText}>{t('generate_barcode')}</Text>}
+                  </LinearGradient>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity style={dynamicStyles.submitBtn} onPress={handleMapBarcode} disabled={mapLoading}>
+                  <LinearGradient colors={['#10B981', '#059669']} style={dynamicStyles.submitBtnGradient}>
+                    {mapLoading ? <ActivityIndicator color={COLORS.white} /> : (
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                        <Ionicons name="link-outline" size={20} color={COLORS.white} />
+                        <Text style={dynamicStyles.submitBtnText}>{t('save_mapping')}</Text>
+                      </View>
+                    )}
+                  </LinearGradient>
+                </TouchableOpacity>
+              )}
 
+              {/* ─── Shared Barcode Result ─── */}
               {generatedBarcode && (
                 <View style={dynamicStyles.barcodeResult}>
+                  {barcodeSource && (
+                    <View style={[
+                      dynamicStyles.mappedBadge, 
+                      { backgroundColor: barcodeSource === 'generated' ? COLORS.info : COLORS.success }
+                    ]}>
+                      <Ionicons 
+                        name={barcodeSource === 'generated' ? "flash-outline" : "checkmark-circle"} 
+                        size={16} 
+                        color={COLORS.white} 
+                      />
+                      <Text style={dynamicStyles.mappedBadgeText}>
+                        {barcodeSource === 'generated' ? t('barcode_source_generated') : t('barcode_source_mapped')}
+                      </Text>
+                    </View>
+                  )}
+                  
                   <Text style={dynamicStyles.barcodeLabel}>{selectedProductName}</Text>
+                  
                   <View style={dynamicStyles.qrContainer}>
-                    <Barcode value={String(generatedBarcode)} format="CODE128" singleBarWidth={2} height={80} />
+                    <Barcode 
+                      value={String(generatedBarcode)} 
+                      format="CODE128" 
+                      singleBarWidth={2} 
+                      height={80} 
+                    />
                   </View>
+                  
                   <Text style={dynamicStyles.barcodeNumber}>{generatedBarcode}</Text>
+                  
                   <View style={dynamicStyles.actionRow}>
                     <TouchableOpacity style={dynamicStyles.printBtn} onPress={handlePrintBarcode}>
                       <Ionicons name="print-outline" size={20} color={COLORS.white} />
@@ -523,6 +760,36 @@ const AdminBarcodeScreen = ({ navigation }) => {
           </View>
         </View>
       </Modal>
+
+      {/* ─── Barcode Scanner Modal (for Map Existing) ─── */}
+      <Modal
+        visible={showScannerModal}
+        animationType="slide"
+        onRequestClose={() => setShowScannerModal(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: '#000' }}>
+          <CameraView
+            style={{ flex: 1 }}
+            facing="back"
+            barcodeScannerSettings={{
+              barcodeTypes: ['code128', 'ean13', 'ean8', 'qr', 'upc_a', 'upc_e'],
+            }}
+            onBarcodeScanned={scannerScanned ? undefined : handleScannerBarcode}
+          />
+          <View style={{ position: 'absolute', top: 50, left: 0, right: 0, alignItems: 'center', zIndex: 10 }}>
+            <Text style={{ color: '#fff', fontSize: 16, ...FONTS.bold, textAlign: 'center' }}>{t('scan_existing_barcode')}</Text>
+          </View>
+          <View style={{ position: 'absolute', bottom: 60, left: 0, right: 0, alignItems: 'center', zIndex: 10 }}>
+            <TouchableOpacity
+              style={{ backgroundColor: COLORS.error, paddingHorizontal: 30, paddingVertical: 14, borderRadius: 16, flexDirection: 'row', alignItems: 'center', gap: 8 }}
+              onPress={() => setShowScannerModal(false)}
+            >
+              <Ionicons name="close" size={20} color="#fff" />
+              <Text style={{ color: '#fff', ...FONTS.bold, fontSize: 14 }}>{t('close_scanner')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -554,6 +821,21 @@ const getStyles = (COLORS) => StyleSheet.create({
   printBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: COLORS.primary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12, ...SHADOWS.small },
   shareBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: COLORS.secondary, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12, ...SHADOWS.small },
   actionBtnText: { color: COLORS.white, ...FONTS.bold },
+
+  // ─── Mode Toggle ───
+  modeToggleContainer: { flexDirection: 'row', marginHorizontal: 20, marginBottom: 16, backgroundColor: COLORS.card, borderRadius: 16, padding: 4, borderWidth: 1, borderColor: COLORS.cardBorder },
+  modeToggleBtn: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 12, borderRadius: 12 },
+  modeToggleBtnActive: { backgroundColor: COLORS.primary, ...SHADOWS.small },
+  modeToggleText: { fontSize: SIZES.sm, color: COLORS.textMuted, ...FONTS.medium },
+  modeToggleTextActive: { color: COLORS.white, ...FONTS.bold },
+
+  // ─── Scan Button ───
+  scanBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 10, backgroundColor: COLORS.accent, paddingVertical: 12, borderRadius: 12, ...SHADOWS.small },
+  scanBtnText: { color: COLORS.white, fontSize: SIZES.md, ...FONTS.bold },
+
+  // ─── Mapped Badge ───
+  mappedBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.success, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, marginBottom: 12 },
+  mappedBadgeText: { color: COLORS.white, fontSize: SIZES.sm, ...FONTS.bold },
 
   // ─── Pill selector styles ───
   pillRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },

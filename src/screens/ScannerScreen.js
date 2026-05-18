@@ -14,7 +14,7 @@ import {
   Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { CameraView, useCameraPermissions, scanFromURLAsync } from 'expo-camera';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS as STATIC_COLORS, FONTS, SIZES, SHADOWS } from '../theme';
@@ -208,12 +208,14 @@ const ScannerScreen = ({ navigation }) => {
       });
 
       if (!result.canceled && result.assets && result.assets.length > 0) {
-        // Since Expo Go doesn't support native barcode scanning from static images 
-        // without a custom build, we show a helpful message instead of crashing.
-        Alert.alert(
-          'Notice', 
-          'Scanning from gallery requires a production build. Please use the live camera for now.'
-        );
+        const uri = result.assets[0].uri;
+        const results = await scanFromURLAsync(uri, ['code128', 'ean13', 'ean8', 'qr', 'upc_a', 'upc_e']);
+        
+        if (results && results.length > 0) {
+          handleBarcodeScanned({ type: results[0].type, data: results[0].data });
+        } else {
+          Alert.alert(t('error'), t('no_barcode_found'));
+        }
       }
     } catch (error) {
       console.log('Error picking image:', error);

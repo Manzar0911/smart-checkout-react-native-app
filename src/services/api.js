@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Change this to your machine's IP if testing on physical device
 // Production: 'https://smart-checkout-app-apis.onrender.com'
 // const BASE_URL = 'http://192.168.31.171:5000';
-// const BASE_URL = 'https://fe36-152-59-34-147.ngrok-free.app';
+// const BASE_URL = 'https://329a-152-59-34-244.ngrok-free.app';
 const BASE_URL = 'https://smart-checkout-app-apis.onrender.com';
 
 const TOKEN_KEY = 'smart_self_checkout_auth_token';
@@ -114,6 +114,10 @@ export const productsAPI = {
   getByBarcode: (barcode) => apiCall(`/api/products/${barcode}`),
   create: (data) => api.post('/api/products', data),
   generateBarcode: (id, data) => api.post(`/api/products/${id}/barcode`, data),
+  mapBarcode: (data) => api.post('/api/products/map-barcode', data),
+  updateBarcode: (barcode, data) => api.put(`/api/products/barcode/${barcode}`, data),
+  deleteBarcode: (barcode) => api.delete(`/api/products/barcode/${barcode}`),
+  getBarcodeList: (page = 1, limit = 50) => apiCall(`/api/products/barcodes/list?page=${page}&limit=${limit}`),
 };
 
 // --- Offers API ---
